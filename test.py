@@ -8,7 +8,6 @@ import subprocess
 subprocess.run(['.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
 # Step 1: Send a GET request to the URL
-# url = 'https://www.finn.no/realestate/homes/search.html?radius=700&lat=59.91638034358857&lon=10.78986414267564&polylocation=&ownership_type=3'
 url = 'https://www.finn.no/realestate/homes/ad.html?finnkode=388216797'
 response = requests.get(url)
 response.raise_for_status()  # Check if the request was successful
