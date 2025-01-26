@@ -30,12 +30,15 @@ urls_df = pd.read_csv('crawling/property_urls.csv').head(3)
 property_data = []
 
 # Loop through each URL and extract property data
-for i, url in enumerate(urls_df['URL']):
-    print(f'Reading URL: {url}')
-    file_name = f'output/property_{i + 1}.html'
-    data = extract_property_data(url, file_name)
-    print(f'Results: {data}')
-    property_data.append(data)
+# for i, url in enumerate(urls_df['URL']):
+#     print(f'Reading URL: {url}')
+#     file_name = f'output/property_{i + 1}.html'
+#     data = extract_property_data(url, file_name)
+#     print(f'Results: {data}')
+#     property_data.append(data)
+data = extract_property_data('https://www.finn.no/realestate/homes/ad.html?finnkode=365034375', 'output/property_FAULTY.html')
+print(f'Results: {data}')
+property_data.append(data)
 
 # Save the combined data to a new CSV file
 df = pd.DataFrame(property_data)

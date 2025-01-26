@@ -8,7 +8,7 @@ from extraction.utils import OLD_getPrice, getAddress, getSize
 subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
 # url = 'https://www.finn.no/realestate/homes/ad.html?finnkode=388216797'
-url = 'https://www.finn.no/realestate/homes/ad.html?finnkode=385589161'
+url = 'https://www.finn.no/realestate/homes/ad.html?finnkode=365034375'
 
 
 def extract_property_data(url):

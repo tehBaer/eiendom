@@ -11,18 +11,13 @@ def OLD_getPrice(soup):
     return prisantydning
 
 
-def getPriceHelper(section):
-    total_price_match = re.search(r'([\d\xa0\s]+) kr', section.get_text())
+def getPrice(soup):
+    pricing_section = soup.find('div', {'data-testid': 'pricing-total-price'})
+    total_price_match = re.search(r'([\d\xa0\s]+) kr', pricing_section.get_text())
     total_price = None
     if total_price_match:
         total_price = total_price_match.group(1).replace('\xa0', '').replace(' ', '')
     return total_price
-
-def getPrice(soup):
-    pricing_section = soup.find('div', {'data-testid': 'pricing-total-price'})
-    price = getPriceHelper(pricing_section)
-    return price
-
 
 
 def getAddress(soup):
@@ -33,6 +28,8 @@ def getAddress(soup):
         if len(parts) > 1:
             address = parts[0].strip()
             area = parts[1].strip()
+            area_match = re.search(r'(\d+)', area)
+            area = area_match.group(1) if area_match else None
         else:
             address = parts[0].strip()
             area = None
@@ -43,9 +40,16 @@ def getAddress(soup):
 
 
 def getSize(soup):
-    bruksareal_element = soup.find('div', {'data-testid': 'info-usable-area'}).find('dd', {'class': 'm-0 font-bold'})
-    bruksareal = bruksareal_element.get_text().strip() if bruksareal_element else None
-    if bruksareal:
-        bruksareal_match = re.search(r'(\d+)\s*m²', bruksareal)
-        bruksareal = bruksareal_match.group(1) if bruksareal_match else None
-    return bruksareal
+    element = soup.find('div', {'data-testid': 'info-usable-area'})
+    output = getSizeHelper(soup, element)
+    if not output:
+        element = soup.find('div', {'data-testid': 'info-usable-i-area'})
+        output = getSizeHelper(soup, element)
+    return output
+
+def getSizeHelper(soup, element):
+    usable_area = element.get_text().strip() if element else None
+    if usable_area:
+        usable_area_match = re.search(r'(\d+)\s*m²', usable_area)
+        usable_area = usable_area_match.group(1) if usable_area_match else None
+    return usable_area
