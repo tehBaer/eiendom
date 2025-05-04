@@ -37,6 +37,7 @@ def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
 
     # Count the unique matches
     count = len(matches)
+    # TODO why does it find 49 and not 50?
     print(f'Number of unique matches: {count}')
 
     # Step 4: Store the URLs in a pandas DataFrame
@@ -50,7 +51,7 @@ def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
     return df
 
 
-def extract_URLs(url, searchTerm, searchName, pageCount):
+def extract_URLs(url, searchTerm, searchName, pageCount=1):
     # Initialize an empty DataFrame
     df = pd.DataFrame(columns=['URL'])
 
@@ -61,10 +62,11 @@ def extract_URLs(url, searchTerm, searchName, pageCount):
     os.makedirs(os.path.join(searchName, 'htmls'), exist_ok=True)
 
     # # Run the function pagecount times and append the results to the DataFrame
+
     for page in range(1, pageCount + 1):
         folder = os.path.join(searchName, 'htmls')
         df = parse_resultpage(url, searchTerm, folder, page, df)
-        time.sleep(random.uniform(100, 2000) / 1000)  # Add a random wait time between 2000 and 4000 milliseconds
+        time.sleep(random.uniform(100, 500) / 1000)
 
     # Save the DataFrame as a CSV file inside the folder
     #  TODO don't overwrite the file if it exists
@@ -77,4 +79,4 @@ def extract_URLs(url, searchTerm, searchName, pageCount):
 
 urlBase = 'https://www.finn.no/realestate/lettings/search.html?filters=&location=0.20061&price_to=20000'
 regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
-df = extract_URLs(urlBase, regex, "leie", 3)
+df = extract_URLs(urlBase, regex, "leie", 33)

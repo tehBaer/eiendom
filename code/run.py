@@ -40,12 +40,10 @@ collectedData = []
 # Loop through each URL and extract property data
 try:
     for index, url in enumerate(urls_df['URL']):
-        # wait between 100 and 2000 milliseconds
-        time.sleep(random.uniform(0.1, 2))
-        print(f'Reading URL at index {index}: {url}')
+        time.sleep(random.uniform(0.05, 0.2))
         try:
             data = extract_property_data(url, index, name)
-            print(f'Results at index {index}: {data}')
+            print(f'Index {index}: {data}')
             collectedData.append(data)
         except Exception as e:
             print(f'Error processing URL at index {index}: {url} - {e}')
