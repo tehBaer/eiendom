@@ -1,4 +1,5 @@
-﻿import random
+﻿import os
+import random
 import subprocess
 import time
 
@@ -9,25 +10,28 @@ from bs4 import BeautifulSoup
 
 subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
-# Step 1: Send a GET request to the URL
-urlBase = 'https://www.finn.no/realestate/homes/search.html?lifecycle=1&location=0.20061&sort=AREA_PROM_DESC&price_collective_to=6500000'
 
-def crawl_finn_realestate(append: str = '', df=None):
+def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
+    append = ''
+    if page != 1:
+        append = f'&page=' + str(page)
     url = urlBase + append
 
+    print("Analyzing URL: ", url)
     response = requests.get(url)
     response.raise_for_status()  # Check if the request was successful
 
     # Step 2: Parse the HTML content using BeautifulSoup
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    # Save the HTML content to a file
-    with open('output.html', 'w', encoding='utf-8') as file:
+    # Save the HTML content to a file inside the folder
+    with open(os.path.join(folder, 'page' + str(page) + '.html'), 'w', encoding='utf-8') as file:
         file.write(soup.prettify())
 
-    # Step 3: Extract the relevant data
-    pattern = re.compile(r'/realestate/homes/ad\.html\?finnkode=\d+')
-    matches = set(pattern.findall(str(soup)))  # Use a set to store unique matches
+    # Extract the relevant data
+    pattern = re.compile(term)
+    # Filter out matches longer than 100 characters
+    matches = {match for match in pattern.findall(str(soup)) if len(match) <= 100}
 
     full_urls = ['https://www.finn.no' + match for match in matches]
 
@@ -43,21 +47,32 @@ def crawl_finn_realestate(append: str = '', df=None):
         df = pd.concat([df, new_df], ignore_index=True)
     else:
         df = new_df
-
     return df
 
-# Initialize an empty DataFrame
-df = pd.DataFrame(columns=['URL'])
 
-# Run the function 16 times and append the results to the DataFrame
-for page in range(1, 17):
-    print(f'Analyzing page {page}')
-    if page == 1:
-        df = crawl_finn_realestate('', df)
-    else:
-        df = crawl_finn_realestate(f'&page={page}', df)
-    time.sleep(random.uniform(100, 2000) / 1000)  # Add a random wait time between 2000 and 4000 milliseconds
+def extract_URLs(url, searchTerm, searchName, pageCount):
+    # Initialize an empty DataFrame
+    df = pd.DataFrame(columns=['URL'])
+
+    # Create a folder for the search
+    os.makedirs(searchName, exist_ok=True)
+
+    #  Create a folder inside the previous folder for the htmls
+    os.makedirs(os.path.join(searchName, 'htmls'), exist_ok=True)
+
+    # # Run the function pagecount times and append the results to the DataFrame
+    for page in range(1, pageCount + 1):
+        folder = os.path.join(searchName, 'htmls')
+        df = parse_resultpage(url, searchTerm, folder, page, df)
+        time.sleep(random.uniform(100, 2000) / 1000)  # Add a random wait time between 2000 and 4000 milliseconds
+
+    # Save the DataFrame as a CSV file inside the folder
+    #  TODO don't overwrite the file if it exists
+    df.to_csv(os.path.join(searchName, f'{searchName}.csv'), index=False)
 
 
-# Save the DataFrame as a CSV file
-df.to_csv('property_urls.csv', index=False)
+# Run the function once and append the results to the DataFrame
+urlBase = 'https://www.finn.no/realestate/homes/search.html?filters=&location=0.20061&price_collective_to=5000000'
+regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
+
+df = extract_URLs(urlBase, regex, "oslotest", 3)
