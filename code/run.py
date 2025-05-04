@@ -6,10 +6,10 @@ import time
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from extraction.utils import getBuyPrice, getAddress, getSize
+from utils import getAddress, getSize
 
 # Ensure the path to the virtual environment activation script is correct
-subprocess.run(['.venv\\Scripts\\activate.bat'], shell=True, check=True)
+subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
 
 def extract_property_data(url, index, name):
@@ -34,7 +34,7 @@ def extract_property_data(url, index, name):
 name = "leie"
 os.makedirs(name, exist_ok=True)
 # Read URLs from the crawl
-urls_df = pd.read_csv('crawling/' + name + "/" + name + '.csv')
+urls_df = pd.read_csv(name + "/" + name + '_crawled.csv')
 collectedData = []
 
 # Loop through each URL and extract property data
@@ -52,5 +52,5 @@ try:
 finally:
     # Save the combined data to a new CSV file in the output directory
     df = pd.DataFrame(collectedData)
-    df.to_csv('output/combined_property_sales.csv', index=False)
+    df.to_csv(f'{name}/{name}_extracted.csv', index=False)
     print('CSV file has been written.')

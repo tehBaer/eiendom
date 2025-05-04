@@ -54,7 +54,7 @@ def extract_URLs(url, searchTerm, searchName, pageCount):
     # Initialize an empty DataFrame
     df = pd.DataFrame(columns=['URL'])
 
-    # Create a folder for the search
+    # Create a folder in the parent directory of this file if it doesn't exist
     os.makedirs(searchName, exist_ok=True)
 
     #  Create a folder inside the previous folder for the htmls
@@ -68,7 +68,7 @@ def extract_URLs(url, searchTerm, searchName, pageCount):
 
     # Save the DataFrame as a CSV file inside the folder
     #  TODO don't overwrite the file if it exists
-    df.to_csv(os.path.join(searchName, f'{searchName}.csv'), index=False)
+    df.to_csv(os.path.join(searchName, f'{searchName}_crawled.csv'), index=False)
 
 
 # urlBase = 'https://www.finn.no/realestate/homes/search.html?filters=&location=0.20061&price_collective_to=5000000'

@@ -3,7 +3,7 @@ import subprocess
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from extraction.utils import OLD_getBuyPrice, getAddress, getSize
+from code.utils import OLD_getBuyPrice, getAddress, getSize
 
 # Ensure the path to the virtual environment activation script is correct
 subprocess.run(['.venv\\Scripts\\activate.bat'], shell=True, check=True)

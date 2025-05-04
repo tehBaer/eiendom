@@ -1,9 +1,8 @@
 ﻿import subprocess
 import pandas as pd
 import requests
-import re
 from bs4 import BeautifulSoup
-from extraction.utils import OLD_getBuyPrice, getAddress, getSize
+from code.utils import OLD_getBuyPrice, getAddress, getSize
 
 subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 

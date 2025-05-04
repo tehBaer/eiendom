@@ -2,7 +2,7 @@
 import subprocess
 import sys
 
-venv_dir = '.venv'
+venv_dir = '../.venv'
 
 # Check if the virtual environment directory exists
 if not os.path.exists(venv_dir):
