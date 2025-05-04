@@ -71,8 +71,10 @@ def extract_URLs(url, searchTerm, searchName, pageCount):
     df.to_csv(os.path.join(searchName, f'{searchName}.csv'), index=False)
 
 
-# Run the function once and append the results to the DataFrame
-urlBase = 'https://www.finn.no/realestate/homes/search.html?filters=&location=0.20061&price_collective_to=5000000'
-regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
+# urlBase = 'https://www.finn.no/realestate/homes/search.html?filters=&location=0.20061&price_collective_to=5000000'
+# regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
+# df = extract_URLs(urlBase, regex, "oslotest", 3)
 
-df = extract_URLs(urlBase, regex, "oslotest", 3)
+urlBase = 'https://www.finn.no/realestate/lettings/search.html?filters=&location=0.20061&price_to=20000'
+regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
+df = extract_URLs(urlBase, regex, "leie", 3)

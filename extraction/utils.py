@@ -1,7 +1,7 @@
 ﻿import re
 
 
-def OLD_getPrice(soup):
+def OLD_getBuyPrice(soup):
     pricing_section = soup.find('section', {'aria-labelledby': 'sales-costs'})
 
     prisantydning_match = re.search(r'kr\s*([\d\s]+),-', pricing_section.get_text())
@@ -11,7 +11,7 @@ def OLD_getPrice(soup):
     return prisantydning
 
 
-def getPrice(soup):
+def getBuyPrice(soup):
     pricing_section = soup.find('div', {'data-testid': 'pricing-total-price'})
     total_price_match = re.search(r'([\d\xa0\s]+) kr', pricing_section.get_text())
     total_price = None

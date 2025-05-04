@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 import re
 from bs4 import BeautifulSoup
-from extraction.utils import OLD_getPrice, getAddress, getSize
+from extraction.utils import OLD_getBuyPrice, getAddress, getSize
 
 subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
@@ -25,7 +25,7 @@ def extract_property_data(url):
 
     # Step 3: Extract the relevant data
     properties = []
-    price = OLD_getPrice(soup)
+    price = OLD_getBuyPrice(soup)
     address, area = getAddress(soup)
     size = getSize(soup)
 

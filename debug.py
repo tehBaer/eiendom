@@ -3,7 +3,7 @@ import subprocess
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from extraction.utils import OLD_getPrice, getAddress, getSize
+from extraction.utils import OLD_getBuyPrice, getAddress, getSize
 
 # Ensure the path to the virtual environment activation script is correct
 subprocess.run(['.venv\\Scripts\\activate.bat'], shell=True, check=True)
@@ -17,7 +17,7 @@ def extract_property_data(url, file_name):
     with open(file_name, 'w', encoding='utf-8') as file:
         file.write(soup.prettify())
 
-    price = OLD_getPrice(soup)
+    price = OLD_getBuyPrice(soup)
     address, area = getAddress(soup)
     size = getSize(soup)
     return {'Prisantydning': price, 'Adresse': address, 'Postnummer': area, 'Størrelse': size}
