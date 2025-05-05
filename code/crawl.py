@@ -2,7 +2,6 @@
 import random
 import subprocess
 import time
-
 import pandas as pd
 import requests
 import re
@@ -51,32 +50,32 @@ def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
     return df
 
 
-def extract_URLs(url, searchTerm, searchName, pageCount=1):
+def extract_URLs(url, searchTerm, name, pageCount=1):
     # Initialize an empty DataFrame
     df = pd.DataFrame(columns=['URL'])
 
     # Create a folder in the parent directory of this file if it doesn't exist
-    os.makedirs(searchName, exist_ok=True)
+    os.makedirs(name, exist_ok=True)
 
     #  Create a folder inside the previous folder for the htmls
-    os.makedirs(os.path.join(searchName, 'htmls'), exist_ok=True)
+    os.makedirs(os.path.join(name, 'html_crawled'), exist_ok=True)
 
     # # Run the function pagecount times and append the results to the DataFrame
 
     for page in range(1, pageCount + 1):
-        folder = os.path.join(searchName, 'htmls')
+        folder = os.path.join(name, 'html_crawled')
         df = parse_resultpage(url, searchTerm, folder, page, df)
         time.sleep(random.uniform(100, 500) / 1000)
 
     # Save the DataFrame as a CSV file inside the folder
     #  TODO don't overwrite the file if it exists
-    df.to_csv(os.path.join(searchName, f'{searchName}_crawled.csv'), index=False)
+    df.to_csv(os.path.join(name, 'crawled.csv'), index=False)
 
 
 # urlBase = 'https://www.finn.no/realestate/homes/search.html?filters=&location=0.20061&price_collective_to=5000000'
 # regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
 # df = extract_URLs(urlBase, regex, "oslotest", 3)
 
-urlBase = 'https://www.finn.no/realestate/lettings/search.html?filters=&location=0.20061&price_to=20000'
+urlBase = 'https://www.finn.no/realestate/lettings/search.html?lat=59.922591746076556&lon=10.73632512241602&radius=7000&price_to=18500&price_from=13000&start_month=202507&start_month=202508&stored-id=79416555&start_month=202509&area_from=30'
 regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
-df = extract_URLs(urlBase, regex, "leie", 33)
+df = extract_URLs(urlBase, regex, "leie", 3)

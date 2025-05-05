@@ -2,12 +2,12 @@
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from code.utils import OLD_getBuyPrice, getAddress, getSize
+
+from code.utils import OLD_getBuyPrice, getAddress, getSize, getRentPrice
 
 subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
-# url = 'https://www.finn.no/realestate/homes/ad.html?finnkode=388216797'
-url = 'https://www.finn.no/realestate/homes/ad.html?finnkode=365034375'
+url = 'https://www.finn.no/realestate/lettings/ad.html?finnkode=328084574'
 
 
 def extract_property_data(url):
@@ -24,11 +24,13 @@ def extract_property_data(url):
 
     # Step 3: Extract the relevant data
     properties = []
-    price = OLD_getBuyPrice(soup)
-    address, area = getAddress(soup)
+    # price = OLD_getBuyPrice(soup)
+    # address, area = getAddress(soup)
     size = getSize(soup)
+    price = getRentPrice(soup)
 
-    properties.append({'Prisantydning': price, 'Adresse': address, 'Postnummer': area, 'Størrelse': size})
+    # properties.append({'Prisantydning': price, 'Adresse': address, 'Postnummer': area, 'Størrelse': size})
+    properties.append({'Prisantydning': price})
 
     # Step 4: Store the extracted data in a pandas DataFrame
     df = pd.DataFrame(properties)
@@ -39,4 +41,4 @@ def extract_property_data(url):
 output = extract_property_data(url)
 # Step 5: Save the DataFrame as a CSV file
 
-output.to_csv('property_sales.csv', index=False)
+output.to_csv('test.csv', index=False)
