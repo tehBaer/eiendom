@@ -29,19 +29,29 @@ def extract_data(url, index, name, save=False):
 
     address, area = getAddress(soup)
     sizes = getAllSizes(soup)
-    price = getRentPrice(soup)
+    prices = getRentPrice(soup)
+    div_element = soup.find('div',
+                            class_='!text-m mb-24 py-4 px-8 border-0 rounded-4 text-xs inline-flex bg-[--w-color-badge-warning-background] s-text')
+    text = None
+    if div_element:
+        # Extract the text from the div element
+        text = div_element.get_text(strip=True)
+
     return {
         'Index': index,
+        'Finnkode': url.split('finnkode=')[1],
         'Adresse': address,
         'Postnummer': area,
         'URL': url,
-        'Leiepris': price,
+        'Utleid': text,
+        'Leiepris': prices.get('monthly'), #Leiepris
+        'Månedsleie': prices.get('deposit'), #Månedsleie
         'Primærrom': sizes.get('info-primary-area'), #Primærrom
         'Internt bruksareal (BRA-i)': sizes.get('info-usable-i-area'), #Internt bruksareal(BRA-i)
         'Bruksareal': sizes.get('info-usable-area'), #Bruksareal
         'Eksternt bruksareal (BRA-e)': sizes.get('info-usable-e-area'), #Eksternt bruksareal (BRA-e)
         'Balkong/Terrasse (TBA)': sizes.get('info-open-area'), #Balkong/Terrasse (TBA)
-        '#Bruttoareal': sizes.get('info-gross-area'), #Bruttoareal
+        'Bruttoareal': sizes.get('info-gross-area'), #Bruttoareal
     }
 
 if __name__ == "__main__":

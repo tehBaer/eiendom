@@ -15,6 +15,7 @@ def saveToFile(url, filename, projectname):
     with open(f'{projectname}/html_extracted/{filename}.html', 'w', encoding='utf-8') as file:
         file.write(url.prettify())
 
+
 def saveToFile(url, filename, folder):
     # Create the folder if it doesn't exist
     os.makedirs(folder, exist_ok=True)
@@ -25,6 +26,7 @@ def saveToFile(url, filename, folder):
     soup = BeautifulSoup(response.text, 'html.parser')  # Parse the HTML content
     with open(f"{folder}/{filename}.html", "w", encoding="utf-8") as file:
         file.write(soup.prettify())  # Use prettify on the BeautifulSoup object
+
 
 def OLD_getBuyPrice(soup):
     pricing_section = soup.find('section', {'aria-labelledby': 'sales-costs'})
@@ -47,19 +49,14 @@ def getBuyPrice(soup):
 
 def getAddress(soup):
     address_element = soup.find('span', {'data-testid': 'object-address'})
-    address = address_element.get_text().strip() if address_element else None
-    if address:
-        addressStrings = address.split(',')
-
-        # If there are multiple commas (edge case), we need to join the last parts
-        addressStrings = [addressStrings[0], ''.join(addressStrings[1:])]
-
-        if len(addressStrings) > 1:
-            address = addressStrings[0].strip()
-            area = GetArea(addressStrings[1])
+    if address_element:
+        full_address = address_element.get_text().strip()
+        if ',' in full_address:
+            address, area_part = map(str.strip, full_address.split(',', 1))
+            area = GetArea(area_part)
         else:
-            area = GetArea(addressStrings[0])
             address = None
+            area = GetArea(full_address)
     else:
         address = None
         area = None
@@ -81,6 +78,7 @@ def getSize(soup):
         output = getSizeHelper(soup, element)
     return output
 
+
 def getSizeHelper(soup, element):
     usable_area = element.get_text().strip() if element else ""
     # print(usable_area)
@@ -91,38 +89,44 @@ def getSizeHelper(soup, element):
 
 
 def getAllSizes(soup):
-        sizes = {}
-        test_ids = [
-            'info-usable-area',
-            'info-usable-i-area',
-            'info-primary-area',
-            'info-gross-area',
-            'info-usable-e-area'
-            'info-open-area'
-        ]
+    sizes = {}
+    test_ids = [
+        'info-usable-area',
+        'info-usable-i-area',
+        'info-primary-area',
+        'info-gross-area',
+        'info-usable-e-area'
+        'info-open-area'
+    ]
 
-        for test_id in test_ids:
-            element = soup.find('div', {'data-testid': test_id})
-            sizes[test_id] = getSizeHelper(soup, element)
+    for test_id in test_ids:
+        element = soup.find('div', {'data-testid': test_id})
+        sizes[test_id] = getSizeHelper(soup, element)
 
-        return sizes
+    return sizes
 
 
-
-def getRentPriceHelper(pricing_section):
+def getPriceHelper(pricing_section, term):
     text = pricing_section.get_text().strip() if pricing_section else ""
-    # rent_price_match = re.search(r'(\d[\d\xa0\s]*)\s*kr', text)
-    rent_price_match = re.search(r'Månedsleie\s*([\d\xa0\s]+)', text)
+
+    rent_price_match = re.search(rf'{term}\s*([\d\xa0\s]+)', text)
     if rent_price_match:
         rent_price = removeSpaces(rent_price_match.group(1))
-        # print(rent_price)
         return rent_price
 
 
 def getRentPrice(soup):
     pricing_sections = soup.find('div', {'data-testid': 'pricing-common-monthly-cost'})
-    rent_price = getRentPriceHelper(pricing_sections) if pricing_sections else None
-    return rent_price
+    rent_price = getPriceHelper(pricing_sections, "Månedsleie") if pricing_sections else None
+
+    deposit_sections = soup.find('div', {'data-testid': 'pricing-deposit'})
+    deposit_price = getPriceHelper(deposit_sections, "Depositum")
+
+    return {
+        'monthly': rent_price,
+        'deposit': deposit_price
+    }
+
 
 def removeSpaces(string):
     return string.replace('\xa0', '').replace(' ', '')

@@ -12,5 +12,9 @@ df['PRIS KVM'] = (df['Leiepris'].astype(float) / df['AREAL'].astype(float)).asty
 #  Format capitalization
 df['Adresse'] = df['Adresse'].str.title()
 
+# Drop columns that are completely empty
+# df = df.dropna(axis=1, how='all')
+df = df.drop(columns=[ 'Primærrom', 'Internt bruksareal (BRA-i)', 'Bruksareal'])
+
 # Save to analyze.csv
 df.to_csv('leie/analyzed.csv', index=False)
