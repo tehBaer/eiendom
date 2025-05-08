@@ -49,19 +49,28 @@ def getAddress(soup):
     address_element = soup.find('span', {'data-testid': 'object-address'})
     address = address_element.get_text().strip() if address_element else None
     if address:
-        parts = address.split(',')
-        if len(parts) > 1:
-            address = parts[0].strip()
-            area = parts[1].strip()
-            area_match = re.search(r'(\d+)', area)
-            area = area_match.group(1) if area_match else None
+        addressStrings = address.split(',')
+
+        # If there are multiple commas (edge case), we need to join the last parts
+        addressStrings = [addressStrings[0], ''.join(addressStrings[1:])]
+
+        if len(addressStrings) > 1:
+            address = addressStrings[0].strip()
+            area = GetArea(addressStrings[1])
         else:
-            address = parts[0].strip()
-            area = None
+            area = GetArea(addressStrings[0])
+            address = None
     else:
         address = None
         area = None
     return address, area
+
+
+def GetArea(part):
+    area = part.strip()
+    area_match = re.search(r'(\d+)', area)
+    area = area_match.group(1) if area_match else None
+    return area
 
 
 def getSize(soup):

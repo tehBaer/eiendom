@@ -1,10 +1,9 @@
-﻿import os
-import random
+﻿import random
 import subprocess
 import time
+
 import pandas as pd
-import requests
-from bs4 import BeautifulSoup
+
 from utils import *
 
 # Ensure the path to the virtual environment activation script is correct
@@ -13,7 +12,7 @@ subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 saveHTMLcount = 5
 
 
-def extract_data(url, index, name):
+def extract_data(url, index, name, save=False):
     response = requests.get(url)
     response.raise_for_status()
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -23,7 +22,7 @@ def extract_data(url, index, name):
     # Create a folder inside the previous folder for the htmls
     os.makedirs(f'{name}/html_extracted', exist_ok=True)
 
-    if (index < saveHTMLcount):
+    if (index < saveHTMLcount or save):
         # Save the HTML content to a file inside the folder
         with open(f'{name}/html_extracted/page{index}.html', 'w', encoding='utf-8') as file:
             file.write(soup.prettify())
@@ -45,28 +44,29 @@ def extract_data(url, index, name):
         '#Bruttoareal': sizes.get('info-gross-area'), #Bruttoareal
     }
 
+if __name__ == "__main__":
 
-# Create the directory if it doesn't exist
-name = "leie"
-os.makedirs(name, exist_ok=True)
-# Read URLs from the crawl
-urls_df = pd.read_csv(f'{name}/crawled.csv')
-collectedData = []
+    # Create the directory if it doesn't exist
+    name = "leie"
+    os.makedirs(name, exist_ok=True)
+    # Read URLs from the crawl
+    urls_df = pd.read_csv(f'{name}/crawled.csv')
+    collectedData = []
 
-# Loop through each URL and extract property data
-try:
-    # Create a folder inside the previous folder for the htmls
-    os.makedirs(f'{name}/html_extracted', exist_ok=True)
-    for index, url in enumerate(urls_df['URL']):
-        time.sleep(random.uniform(0.05, 0.2))
-        try:
-            data = extract_data(url, index, name)
-            print(f'Index {index}: {data}')
-            collectedData.append(data)
-        except Exception as e:
-            print(f'Error processing URL at index {index}: {url} - {e}')
-finally:
-    # Save the combined data to a new CSV file in the output directory
-    df = pd.DataFrame(collectedData)
-    df.to_csv(f'{name}/extracted.csv', index=False)
-    print('CSV file has been written.')
+    # Loop through each URL and extract property data
+    try:
+        # Create a folder inside the previous folder for the htmls
+        os.makedirs(f'{name}/html_extracted', exist_ok=True)
+        for index, url in enumerate(urls_df['URL']):
+            time.sleep(random.uniform(0.1, 0.1))
+            try:
+                data = extract_data(url, index, name)
+                print(f'Index {index}: {data}')
+                collectedData.append(data)
+            except Exception as e:
+                print(f'Error processing URL at index {index}: {url} - {e}')
+    finally:
+        # Save the combined data to a new CSV file in the output directory
+        df = pd.DataFrame(collectedData)
+        df.to_csv(f'{name}/extracted.csv', index=False)
+        print('CSV file has been written.')
