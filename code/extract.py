@@ -40,12 +40,12 @@ def extract_data(url, index, name, save=False):
     return {
         'Index': index,
         'Finnkode': url.split('finnkode=')[1],
+        'Utleid': text,
         'Adresse': address,
         'Postnummer': area,
-        'URL': url,
-        'Utleid': text,
         'Leiepris': prices.get('monthly'), #Leiepris
-        'Månedsleie': prices.get('deposit'), #Månedsleie
+        'Depositum': prices.get('deposit'), #Månedsleie
+        'URL': url,
         'Primærrom': sizes.get('info-primary-area'), #Primærrom
         'Internt bruksareal (BRA-i)': sizes.get('info-usable-i-area'), #Internt bruksareal(BRA-i)
         'Bruksareal': sizes.get('info-usable-area'), #Bruksareal
