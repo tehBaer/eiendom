@@ -1,13 +1,10 @@
 ﻿import os
 import random
-import subprocess
 import time
 import pandas as pd
 import requests
 import re
 from bs4 import BeautifulSoup
-
-subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
 
 def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
@@ -20,7 +17,7 @@ def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
     response = requests.get(url)
     response.raise_for_status()  # Check if the request was successful
 
-    # Step 2: Parse the HTML content using BeautifulSoup
+    # Parse the HTML content using BeautifulSoup
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # Save the HTML content to a file inside the folder
@@ -29,17 +26,14 @@ def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
 
     # Extract the relevant data
     pattern = re.compile(term)
-    # Filter out matches longer than 100 characters
     matches = {match for match in pattern.findall(str(soup)) if len(match) <= 100}
 
     full_urls = ['https://www.finn.no' + match for match in matches]
 
     # Count the unique matches
-    count = len(matches)
-    # TODO why does it find 49 and not 50?
-    print(f'Number of unique matches: {count}')
+    print(f'Number of unique matches on page {page}: {len(matches)}')
 
-    # Step 4: Store the URLs in a pandas DataFrame
+    # Store the URLs in a pandas DataFrame
     new_df = pd.DataFrame(full_urls, columns=['URL'])
 
     # Append new URLs to the existing DataFrame
@@ -47,34 +41,38 @@ def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
         df = pd.concat([df, new_df], ignore_index=True)
     else:
         df = new_df
-    return df
+    return df, len(matches)
 
 
-def extract_URLs(url, searchTerm, name, pageCount=1):
+def extract_URLs(url, searchTerm, name):
     # Initialize an empty DataFrame
     df = pd.DataFrame(columns=['URL'])
 
     # Create a folder in the parent directory of this file if it doesn't exist
     os.makedirs(name, exist_ok=True)
 
-    #  Create a folder inside the previous folder for the htmls
+    # Create a folder inside the previous folder for the HTMLs
     os.makedirs(os.path.join(name, 'html_crawled'), exist_ok=True)
 
-    # Run the function pagecount times and append the results to the DataFrame
-    for page in range(1, pageCount + 1):
+    page = 1
+    while True:
         folder = os.path.join(name, 'html_crawled')
-        df = parse_resultpage(url, searchTerm, folder, page, df)
+        df, match_count = parse_resultpage(url, searchTerm, folder, page, df)
+        if match_count == 0:
+            print("No more results found. Stopping.")
+            break
+        page += 1
         time.sleep(random.uniform(100, 500) / 1000)
 
     # Save the DataFrame as a CSV file inside the folder
-    #  TODO don't overwrite the file if it exists
     df.to_csv(os.path.join(name, 'crawled.csv'), index=False)
+    print("Crawling completed. Results saved to 'crawled.csv'.")
 
 
 def executePredefinedSearch():
     urlBase = 'https://www.finn.no/realestate/lettings/search.html?lat=59.922591746076556&lon=10.73632512241602&radius=7000&price_to=18500&price_from=13000&start_month=202507&start_month=202508&stored-id=79416555&start_month=202509&area_from=30'
     regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
-    extract_URLs(urlBase, regex, "leie", 3)
+    extract_URLs(urlBase, regex, "leie")
 
 if __name__ == "__main__":
     executePredefinedSearch()

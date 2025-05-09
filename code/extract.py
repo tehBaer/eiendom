@@ -1,18 +1,14 @@
 ﻿import random
 import subprocess
 import time
-
 import pandas as pd
-
 from utils import *
 
 # Ensure the path to the virtual environment activation script is correct
 subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
-saveHTMLcount = 5
 
-
-def extract_data(url, index, name, save=False):
+def extract_data(url, index, name, saveToHTML=False):
     response = requests.get(url)
     response.raise_for_status()
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -22,7 +18,7 @@ def extract_data(url, index, name, save=False):
     # Create a folder inside the previous folder for the htmls
     os.makedirs(f'{name}/html_extracted', exist_ok=True)
 
-    if (index < saveHTMLcount or save):
+    if (saveToHTML):
         # Save the HTML content to a file inside the folder
         with open(f'{name}/html_extracted/page{index}.html', 'w', encoding='utf-8') as file:
             file.write(soup.prettify())
@@ -54,11 +50,11 @@ def extract_data(url, index, name, save=False):
         'Bruttoareal': sizes.get('info-gross-area'),
     }
 
-if __name__ == "__main__":
-
+def executePredefinedCrawl():
     # Create the directory if it doesn't exist
     name = "leie"
     os.makedirs(name, exist_ok=True)
+
     # Read URLs from the crawl
     urls_df = pd.read_csv(f'{name}/crawled.csv')
     collectedData = []
@@ -80,3 +76,7 @@ if __name__ == "__main__":
         df = pd.DataFrame(collectedData)
         df.to_csv(f'{name}/extracted.csv', index=False)
         print('CSV file has been written.')
+
+
+if __name__ == "__main__":
+    executePredefinedCrawl()

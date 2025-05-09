@@ -8,12 +8,8 @@ from googleapiclient.errors import HttpError
 import locale
 import datetime
 
-# If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-
-# The ID of the target spreadsheet.
 SPREADSHEET_ID = "1HW6-mtyK5FDGA_aL1EUyX4ZQMZozL3XXeNcqzjlRYDA"
-
 
 def export():
     """Writes the content of analyzed.csv to a new sheet in the target spreadsheet."""
@@ -43,9 +39,31 @@ def export():
         locale.setlocale(locale.LC_TIME, "nb_NO.UTF-8")
 
         # Get the current date in the desired format
-        sheet_name = datetime.datetime.now().strftime("%#d. %B").capitalize()
+        base_sheet_name = datetime.datetime.now().strftime("%#d. %B").capitalize()
+
+        # Check if the sheet name already exists
+        existing_sheets = service.spreadsheets().get(spreadsheetId=SPREADSHEET_ID).execute()["sheets"]
+        existing_titles = [sheet["properties"]["title"] for sheet in existing_sheets]
+
+        sheet_name = base_sheet_name
+        counter = 1
+        while sheet_name in existing_titles:
+            sheet_name = f"{base_sheet_name} ({counter})"
+            counter += 1
+
         # Add a new sheet to the spreadsheet
-        sheet_body = {"requests": [{"addSheet": {"properties": {"title": sheet_name}}}]}
+        sheet_body = {
+            "requests": [
+                {
+                    "addSheet": {
+                        "properties": {
+                            "title": sheet_name,
+                            "gridProperties": {"frozenRowCount": 1},
+                        }
+                    }
+                }
+            ]
+        }
         service.spreadsheets().batchUpdate(spreadsheetId=SPREADSHEET_ID, body=sheet_body).execute()
 
         # Write data to the new sheet
@@ -58,10 +76,9 @@ def export():
             body=body,
         ).execute()
 
-        print("Data successfully written to the new sheet.")
+        print(f"Data successfully written to the new sheet: {sheet_name}.")
     except HttpError as err:
         print(err)
-
 
 if __name__ == "__main__":
     export()
