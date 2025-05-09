@@ -27,10 +27,26 @@ def get_credentials():
     return creds
 
 def read_csv(file_path):
-    """Read data from a CSV file."""
+    """Read data from a CSV file and process it."""
     with open(file_path, "r", encoding="utf-8") as file:
         csv_reader = csv.reader(file)
-        return list(csv_reader)
+        data = list(csv_reader)
+
+    # Add hyperlink to Finnkode and remove URL column
+    header = data[0]
+    if "URL" in header and "Finnkode" in header:
+        url_index = header.index("URL")
+        finnkode_index = header.index("Finnkode")
+
+        # Update header
+        header.pop(url_index)
+
+        # Update rows
+        for row in data[1:]:
+            row[finnkode_index] = f'=HYPERLINK("{row[url_index]}", "{row[finnkode_index]}")'
+            row.pop(url_index)
+
+    return data
 
 def get_unique_sheet_name(service, base_name):
     """Generate a unique sheet name by appending a number if needed."""
@@ -67,7 +83,7 @@ def write_data_to_sheet(service, sheet_name, data):
     service.spreadsheets().values().update(
         spreadsheetId=SPREADSHEET_ID,
         range=range_name,
-        valueInputOption="RAW",
+        valueInputOption="USER_ENTERED",  # Ensures formulas are parsed correctly
         body=body,
     ).execute()
 
