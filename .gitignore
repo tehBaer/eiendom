@@ -1,0 +1,4 @@
+﻿*.html
+*.csv
+*.pyc
+credentials.json
