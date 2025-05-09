@@ -39,8 +39,6 @@ def export():
             csv_reader = csv.reader(file)
             data = list(csv_reader)
 
-
-
         # Set the locale to Norwegian
         locale.setlocale(locale.LC_TIME, "nb_NO.UTF-8")
 

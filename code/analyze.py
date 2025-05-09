@@ -15,7 +15,6 @@ def analyze():
     df['Adresse'] = df['Adresse'].str.title()
 
     # Drop columns that are completely empty
-    # df = df.dropna(axis=1, how='all')
     df = df.drop(columns=['Primærrom', 'Internt bruksareal (BRA-i)', 'Bruksareal', 'Eksternt bruksareal (BRA-e)',
                           'Balkong/Terrasse (TBA)', 'Bruttoareal'])
 

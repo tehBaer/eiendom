@@ -43,15 +43,15 @@ def extract_data(url, index, name, save=False):
         'Utleid': text,
         'Adresse': address,
         'Postnummer': area,
-        'Leiepris': prices.get('monthly'), #Leiepris
-        'Depositum': prices.get('deposit'), #Månedsleie
+        'Leiepris': prices.get('monthly'),
+        'Depositum': prices.get('deposit'),
         'URL': url,
-        'Primærrom': sizes.get('info-primary-area'), #Primærrom
-        'Internt bruksareal (BRA-i)': sizes.get('info-usable-i-area'), #Internt bruksareal(BRA-i)
-        'Bruksareal': sizes.get('info-usable-area'), #Bruksareal
-        'Eksternt bruksareal (BRA-e)': sizes.get('info-usable-e-area'), #Eksternt bruksareal (BRA-e)
-        'Balkong/Terrasse (TBA)': sizes.get('info-open-area'), #Balkong/Terrasse (TBA)
-        'Bruttoareal': sizes.get('info-gross-area'), #Bruttoareal
+        'Primærrom': sizes.get('info-primary-area'),
+        'Internt bruksareal (BRA-i)': sizes.get('info-usable-i-area'),
+        'Bruksareal': sizes.get('info-usable-area'),
+        'Eksternt bruksareal (BRA-e)': sizes.get('info-usable-e-area'),
+        'Balkong/Terrasse (TBA)': sizes.get('info-open-area'),
+        'Bruttoareal': sizes.get('info-gross-area'),
     }
 
 if __name__ == "__main__":

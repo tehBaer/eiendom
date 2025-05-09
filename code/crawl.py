@@ -60,8 +60,7 @@ def extract_URLs(url, searchTerm, name, pageCount=1):
     #  Create a folder inside the previous folder for the htmls
     os.makedirs(os.path.join(name, 'html_crawled'), exist_ok=True)
 
-    # # Run the function pagecount times and append the results to the DataFrame
-
+    # Run the function pagecount times and append the results to the DataFrame
     for page in range(1, pageCount + 1):
         folder = os.path.join(name, 'html_crawled')
         df = parse_resultpage(url, searchTerm, folder, page, df)
@@ -71,11 +70,11 @@ def extract_URLs(url, searchTerm, name, pageCount=1):
     #  TODO don't overwrite the file if it exists
     df.to_csv(os.path.join(name, 'crawled.csv'), index=False)
 
-if __name__ == "__main__":
-    # urlBase = 'https://www.finn.no/realestate/homes/search.html?filters=&location=0.20061&price_collective_to=5000000'
-    # regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
-    # df = extract_URLs(urlBase, regex, "oslotest", 3)
 
+def executePredefinedSearch():
     urlBase = 'https://www.finn.no/realestate/lettings/search.html?lat=59.922591746076556&lon=10.73632512241602&radius=7000&price_to=18500&price_from=13000&start_month=202507&start_month=202508&stored-id=79416555&start_month=202509&area_from=30'
     regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
-    df = extract_URLs(urlBase, regex, "leie", 3)
+    extract_URLs(urlBase, regex, "leie", 3)
+
+if __name__ == "__main__":
+    executePredefinedSearch()
