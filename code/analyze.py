@@ -1,21 +1,23 @@
 ﻿import pandas as pd
 
-# Read the CSV file into a DataFrame
-file_path = 'leie/extracted.csv'
-df = pd.read_csv(file_path)
 
-df['AREAL'] = df['Primærrom'].fillna(df['Internt bruksareal (BRA-i)']).fillna(df['Bruksareal'])
+def analyze():
+    # Read the CSV file into a DataFrame
+    file_path = 'leie/extracted.csv'
+    df = pd.read_csv(file_path)
 
-# Calculate and add 'PRIS KVM' column
-df['PRIS KVM'] = (df['Leiepris'].astype(float) / df['AREAL'].astype(float)).astype(int)
+    df['AREAL'] = df['Primærrom'].fillna(df['Internt bruksareal (BRA-i)']).fillna(df['Bruksareal'])
 
-#  Format capitalization
-df['Adresse'] = df['Adresse'].str.title()
+    # Calculate and add 'PRIS KVM' column
+    df['PRIS KVM'] = (df['Leiepris'].astype(float) / df['AREAL'].astype(float)).astype(int)
 
-# Drop columns that are completely empty
-# df = df.dropna(axis=1, how='all')
-df = df.drop(columns=[ 'Primærrom', 'Internt bruksareal (BRA-i)', 'Bruksareal', 'Eksternt bruksareal (BRA-e)', 'Balkong/Terrasse (TBA)', 'Bruttoareal'])
+    #  Format capitalization
+    df['Adresse'] = df['Adresse'].str.title()
 
+    # Drop columns that are completely empty
+    # df = df.dropna(axis=1, how='all')
+    df = df.drop(columns=['Primærrom', 'Internt bruksareal (BRA-i)', 'Bruksareal', 'Eksternt bruksareal (BRA-e)',
+                          'Balkong/Terrasse (TBA)', 'Bruttoareal'])
 
-# Save to analyze.csv
-df.to_csv('leie/analyzed.csv', index=False)
+    # Save to analyze.csv
+    df.to_csv('leie/analyzed.csv', index=False)
