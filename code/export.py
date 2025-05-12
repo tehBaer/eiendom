@@ -7,6 +7,8 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+import pandas as pd
+
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 SPREADSHEET_ID = "1HW6-mtyK5FDGA_aL1EUyX4ZQMZozL3XXeNcqzjlRYDA"
@@ -70,6 +72,7 @@ def download_sheet_as_csv(service, sheet_name, output_file, range):
 
 
 
+
 import pandas as pd
 
 def find_new_rows(analyzed_path, sheets_path, output_path):
@@ -94,6 +97,9 @@ def find_new_rows(analyzed_path, sheets_path, output_path):
         # Find Finnkode IDs in analyzed.csv that are not in sheets.csv
         missing_finnkode = analyzed_df[~analyzed_df['Finnkode'].isin(sheets_df['Finnkode'])]
 
+        # Add an empty column at the start
+        missing_finnkode.insert(0, '', '')
+
         # Save only the missing Finnkode rows to a new CSV file
         missing_finnkode.to_csv(output_path, index=False)
 
@@ -102,8 +108,10 @@ def find_new_rows(analyzed_path, sheets_path, output_path):
 
 import csv
 
+import csv
+
 def prepend_missing_rows(service, sheet_name, missing_rows_path, range):
-    """Prepend missing rows to the top of the specified sheet, filling columns before and after the range with empty cells."""
+    """Prepend missing rows below the header of the specified sheet, filling columns before and after the range with empty cells."""
     # Read missing rows from the CSV file
     with open(missing_rows_path, "r", encoding="utf-8") as file:
         csv_reader = csv.reader(file)
@@ -131,8 +139,8 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path, range):
         for row in missing_rows
     ]
 
-    # Combine header, padded missing rows, and existing data
-    updated_data = padded_missing_rows + existing_data
+    # Combine header, existing data, and padded missing rows
+    updated_data = [existing_data[0]] + padded_missing_rows + existing_data[1:]
 
     # Write the updated data back to the sheet
     body = {"values": updated_data}
@@ -143,7 +151,7 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path, range):
         body=body,
     ).execute()
 
-    print(f"Missing rows have been prepended to the sheet: {sheet_name}")
+    print(f"Missing rows have been prepended below the header in the sheet: {sheet_name}")
 
 
 

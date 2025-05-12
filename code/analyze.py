@@ -1,6 +1,9 @@
 ﻿import pandas as pd
 
 
+import pandas as pd
+
+
 def analyze():
     # Read the CSV file into a DataFrame
     file_path = 'leie/extracted.csv'
@@ -11,7 +14,7 @@ def analyze():
     # Calculate and add 'PRIS KVM' column
     df['PRIS KVM'] = (df['Leiepris'].astype(float) / df['AREAL'].astype(float)).astype(int)
 
-    #  Format capitalization
+    # Format capitalization
     df['Adresse'] = df['Adresse'].str.title()
 
     # Drop columns that are completely empty
@@ -23,5 +26,12 @@ def analyze():
                           'Bruttoareal'
                           ])
 
+    # Add an empty column at the start
+    df.insert(0, '', '')
+
     # Save to analyze.csv
     df.to_csv('leie/analyzed.csv', index=False)
+
+# if main
+if __name__ == "__main__":
+    analyze()
