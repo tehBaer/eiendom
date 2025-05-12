@@ -173,24 +173,23 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path, range, empty_co
 
 
 
-def merge():
+def merge(emptyColCount, sheet_name):
     """Main function to export data to Google Sheets."""
     try:
         creds = get_credentials()
         service = build("sheets", "v4", credentials=creds)
 
         range = "A1:Z1000"
-        emptyColCount = 2
 
-        download_sheet_as_csv(service, "test", "leie/_sheets.csv", range)
+        download_sheet_as_csv(service, sheet_name, "leie/_sheets.csv", range)
 
         find_new_rows("leie/analyzed.csv", "leie/_sheets.csv", "leie/_sheets_missing.csv", emptyColCount)
 
-        prepend_missing_rows(service, "test", "leie/_sheets_missing.csv", range, emptyColCount)
+        prepend_missing_rows(service, sheet_name, "leie/_sheets_missing.csv", range, emptyColCount)
         print(f"Data successfully updated.")
     except HttpError as err:
         print(err)
 
 
 if __name__ == "__main__":
-    merge()
+    merge(2, "Main")

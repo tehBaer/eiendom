@@ -33,4 +33,4 @@ def analyze(emptyColumnsCount):
 
 # if main
 if __name__ == "__main__":
-    analyze(2)
+    analyze(1)
