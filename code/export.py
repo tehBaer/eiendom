@@ -73,8 +73,6 @@ def download_sheet_as_csv(service, sheet_name, output_file, range):
 
 import pandas as pd
 
-import pandas as pd
-
 def find_new_rows(analyzed_path, sheets_path, output_path, empty_columns_count):
     """Find rows in analyzed.csv not present in sheets.csv and save them to a new CSV."""
     try:
@@ -150,17 +148,9 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path, range, empty_co
         result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range_name).execute()
         existing_data = result.get("values", [])
 
-        # Determine the number of columns in the full sheet
-        sheet_metadata = service.spreadsheets().get(spreadsheetId=SPREADSHEET_ID).execute()
-        total_columns = sheet_metadata["sheets"][0]["properties"]["gridProperties"]["columnCount"]
-
-        # Determine the start and end columns of the specified range
-        start_column = ord(range.split(":")[0][0]) - ord("A")
-        end_column = ord(range.split(":")[1][0]) - ord("A") + 1
-
-        # Pad missing rows with empty cells before and after the range
+        # Ensure each row has exactly `empty_columns_count` empty cells at the start
         padded_missing_rows = [
-            [""] * empty_columns_count + row + [""] * (total_columns - len(row) - empty_columns_count)
+            ([""] * empty_columns_count + row[empty_columns_count:])[:len(header)]
             for row in missing_rows
         ]
 
