@@ -15,7 +15,7 @@ executePredefinedCrawl()
 
 emptyColCount = 2
 # 3
-analyze(emptyColCount)
+analyze()
 
 # 4
 

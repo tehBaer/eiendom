@@ -4,7 +4,7 @@
 import pandas as pd
 
 
-def analyze(emptyColumnsCount):
+def analyze(emptyColumnsCount = 0):
     # Read the CSV file into a DataFrame
     file_path = 'leie/extracted.csv'
     df = pd.read_csv(file_path)
@@ -31,12 +31,12 @@ def analyze(emptyColumnsCount):
                           ])
 
     # Add empty columns
-    for i in range(emptyColumnsCount):
-        df.insert(0, f'Empty{i + 1}', '')
+    # for i in range(emptyColumnsCount):
+    #     df.insert(0, f'Empty{i + 1}', '')
 
     # Save to analyze.csv
     df.to_csv('leie/analyzed.csv', index=False)
 
 # if main
 if __name__ == "__main__":
-    analyze(1)
+    analyze(0)
