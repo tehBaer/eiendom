@@ -7,8 +7,6 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-import pandas as pd
-
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 SPREADSHEET_ID = "1HW6-mtyK5FDGA_aL1EUyX4ZQMZozL3XXeNcqzjlRYDA"
@@ -72,10 +70,7 @@ def download_sheet_as_csv(service, sheet_name, output_file, range):
 
 
 
-
-import pandas as pd
-
-def find_new_rows(analyzed_path, sheets_path, output_path):
+def find_new_rows(analyzed_path, sheets_path, output_path, empty_columns_count):
     """Find Finnkode IDs in analyzed.csv that are not in sheets.csv and save only those rows to a new CSV."""
     try:
         # Load the analyzed.csv and sheets.csv files with error handling for inconsistent rows
@@ -97,8 +92,9 @@ def find_new_rows(analyzed_path, sheets_path, output_path):
         # Find Finnkode IDs in analyzed.csv that are not in sheets.csv
         missing_finnkode = analyzed_df[~analyzed_df['Finnkode'].isin(sheets_df['Finnkode'])]
 
-        # Add an empty column at the start
-        missing_finnkode.insert(0, '', '')
+        # Add empty columns to the missing rows
+        for i in range(empty_columns_count):
+            missing_finnkode.insert(0, '', '')
 
         # Save only the missing Finnkode rows to a new CSV file
         missing_finnkode.to_csv(output_path, index=False)
@@ -106,11 +102,8 @@ def find_new_rows(analyzed_path, sheets_path, output_path):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-import csv
 
-import csv
-
-def prepend_missing_rows(service, sheet_name, missing_rows_path, range):
+def prepend_missing_rows(service, sheet_name, missing_rows_path, range, empty_columns_count):
     """Prepend missing rows below the header of the specified sheet, filling columns before and after the range with empty cells."""
     # Read missing rows from the CSV file
     with open(missing_rows_path, "r", encoding="utf-8") as file:
@@ -135,7 +128,7 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path, range):
 
     # Pad missing rows with empty cells before and after the range
     padded_missing_rows = [
-        [""] * start_column + row + [""] * (total_columns - end_column)
+        [""] * empty_columns_count + [""] * start_column + row + [""] * (total_columns - end_column)
         for row in missing_rows
     ]
 
@@ -161,13 +154,14 @@ def merge():
         creds = get_credentials()
         service = build("sheets", "v4", credentials=creds)
 
-        range1 = "A1:Z1000"
+        range = "A1:Z1000"
+        emptyColCount = 2
 
-        download_sheet_as_csv(service, "test", "leie/_sheets.csv", range1)
+        download_sheet_as_csv(service, "test", "leie/_sheets.csv", range)
 
-        find_new_rows("leie/analyzed.csv", "leie/_sheets.csv", "leie/_sheets_missing.csv")
+        find_new_rows("leie/analyzed.csv", "leie/_sheets.csv", "leie/_sheets_missing.csv", emptyColCount)
 
-        prepend_missing_rows(service, "test", "leie/_sheets_missing.csv", range1)
+        # prepend_missing_rows(service, "test", "leie/_sheets_missing.csv", range, emptyColCount)
         print(f"Data successfully updated.")
     except HttpError as err:
         print(err)
