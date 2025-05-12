@@ -75,25 +75,24 @@ import pandas as pd
 def find_new_rows(analyzed_path, sheets_path, output_path):
     """Find Finnkode IDs in analyzed.csv that are not in sheets.csv and save only those rows to a new CSV."""
     try:
-        # Load the analyzed.csv and sheets.csv files
+        # Load the analyzed.csv and sheets.csv files with error handling for inconsistent rows
         analyzed_df = pd.read_csv(analyzed_path)
         sheets_df = pd.read_csv(sheets_path, header=None,
                                 names=['Index', 'Finnkode', 'Utleid', 'Adresse', 'Postnummer', 'Leiepris',
-                                       'Depositum', 'URL', 'AREAL', 'PRIS KVM'])
+                                       'Depositum', 'URL', 'AREAL', 'PRIS KVM'],
+                                on_bad_lines='skip')  # Skip problematic rows
 
         # Clean and standardize the Finnkode columns
         analyzed_df['Finnkode'] = analyzed_df['Finnkode'].astype(str).str.strip()
         sheets_df['Finnkode'] = sheets_df['Finnkode'].astype(str).str.strip()
 
-        # Debug: Print row counts
-        print(f"Rows in analyzed: {len(analyzed_df)}")
-        print(f"Rows in sheets: {len(sheets_df)}")
+        # Align columns for comparison
+        common_columns = analyzed_df.columns.intersection(sheets_df.columns)
+        analyzed_df = analyzed_df[common_columns]
+        sheets_df = sheets_df[common_columns]
 
         # Find Finnkode IDs in analyzed.csv that are not in sheets.csv
         missing_finnkode = analyzed_df[~analyzed_df['Finnkode'].isin(sheets_df['Finnkode'])]
-
-        # Debug: Print missing rows
-        print(f"Missing rows: {missing_finnkode}")
 
         # Save only the missing Finnkode rows to a new CSV file
         missing_finnkode.to_csv(output_path, index=False)
@@ -101,9 +100,10 @@ def find_new_rows(analyzed_path, sheets_path, output_path):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+import csv
 
 def prepend_missing_rows(service, sheet_name, missing_rows_path):
-    """Prepend missing rows to the top of the specified sheet."""
+    """Prepend missing rows to the top of the specified sheet, maintaining extra column alignment."""
     # Read missing rows from the CSV file
     with open(missing_rows_path, "r", encoding="utf-8") as file:
         csv_reader = csv.reader(file)
@@ -118,8 +118,14 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path):
     result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range_name).execute()
     existing_data = result.get("values", [])
 
-    # Combine header, missing rows, and existing data
-    updated_data = [header] + missing_rows + existing_data[1:]  # Keep the original header
+    # Determine the number of columns in the existing data
+    max_columns = max(len(row) for row in existing_data) if existing_data else len(header)
+
+    # Pad missing rows to match the number of columns in the existing data
+    padded_missing_rows = [row + [""] * (max_columns - len(row)) for row in missing_rows]
+
+    # Combine header, padded missing rows, and existing data
+    updated_data = [header] + padded_missing_rows + existing_data[1:]  # Keep the original header
 
     # Write the updated data back to the sheet
     body = {"values": updated_data}
@@ -131,6 +137,9 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path):
     ).execute()
 
     print(f"Missing rows have been prepended to the sheet: {sheet_name}")
+
+
+
 def merge():
     """Main function to export data to Google Sheets."""
     try:
