@@ -1,5 +1,6 @@
 ﻿import csv
 import os.path
+from doctest import debug
 
 import pandas as pd
 from google.auth.transport.requests import Request
@@ -70,34 +71,63 @@ def download_sheet_as_csv(service, sheet_name, output_file, range):
 
 
 
-def find_new_rows(analyzed_path, sheets_path, output_path, empty_columns_count):
-    """Find Finnkode IDs in analyzed.csv that are not in sheets.csv and save only those rows to a new CSV."""
-    try:
-        # Load the analyzed.csv and sheets.csv files with error handling for inconsistent rows
-        analyzed_df = pd.read_csv(analyzed_path)
-        sheets_df = pd.read_csv(sheets_path, header=None,
-                                names=['Index', 'Finnkode', 'Utleid', 'Adresse', 'Postnummer', 'Leiepris',
-                                       'Depositum', 'URL', 'AREAL', 'PRIS KVM'],
-                                on_bad_lines='skip')  # Skip problematic rows
+import pandas as pd
 
-        # Clean and standardize the Finnkode columns
+import pandas as pd
+
+def find_new_rows(analyzed_path, sheets_path, output_path, empty_columns_count):
+    """Find rows in analyzed.csv not present in sheets.csv and save them to a new CSV."""
+    try:
+        # Load the CSV files
+        analyzed_df = pd.read_csv(analyzed_path)
+        sheets_df = pd.read_csv(
+            sheets_path,
+            header=None,
+            names=['Index', 'Finnkode', 'Utleid', 'Adresse', 'Postnummer', 'Leiepris',
+                   'Depositum', 'URL', 'AREAL', 'PRIS KVM'],
+            on_bad_lines='skip'
+        )
+
+        # Clean and standardize the Finnkode column
         analyzed_df['Finnkode'] = analyzed_df['Finnkode'].astype(str).str.strip()
         sheets_df['Finnkode'] = sheets_df['Finnkode'].astype(str).str.strip()
+
+        # Debug: Print unique Finnkode values
+        print("Unique Finnkode in analyzed.csv:", analyzed_df['Finnkode'].unique())
+        print("Unique Finnkode in sheets.csv:", sheets_df['Finnkode'].unique())
 
         # Align columns for comparison
         common_columns = analyzed_df.columns.intersection(sheets_df.columns)
         analyzed_df = analyzed_df[common_columns]
         sheets_df = sheets_df[common_columns]
 
-        # Find Finnkode IDs in analyzed.csv that are not in sheets.csv
+        # Debug: Print aligned DataFrames
+        print("Aligned analyzed_df:")
+        print(analyzed_df.head())
+        print("Aligned sheets_df:")
+        print(sheets_df.head())
+
+        # Find rows in analyzed.csv not in sheets.csv
         missing_finnkode = analyzed_df[~analyzed_df['Finnkode'].isin(sheets_df['Finnkode'])]
 
-        # Add empty columns to the missing rows
-        for i in range(empty_columns_count):
-            missing_finnkode.insert(0, '', '')
+        # Debug: Print missing rows
+        print("Missing rows:")
+        print(missing_finnkode)
 
-        # Save only the missing Finnkode rows to a new CSV file
+        # Check if there are missing rows
+        if missing_finnkode.empty:
+            print("No new rows to save. The output file will not be created.")
+            return
+
+        # Add empty columns to the missing rows
+
+        for i in range(empty_columns_count):
+            missing_finnkode.insert(0, f'Empty{i + 1}', '')
+
+
+        # Save missing rows to a new CSV file
         missing_finnkode.to_csv(output_path, index=False)
+        print(f"Missing rows saved to '{output_path}'.")
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -105,46 +135,51 @@ def find_new_rows(analyzed_path, sheets_path, output_path, empty_columns_count):
 
 def prepend_missing_rows(service, sheet_name, missing_rows_path, range, empty_columns_count):
     """Prepend missing rows below the header of the specified sheet, filling columns before and after the range with empty cells."""
-    # Read missing rows from the CSV file
-    with open(missing_rows_path, "r", encoding="utf-8") as file:
-        csv_reader = csv.reader(file)
-        missing_rows = list(csv_reader)
+    try:
+        # Read missing rows from the CSV file
+        with open(missing_rows_path, "r", encoding="utf-8") as file:
+            csv_reader = csv.reader(file)
+            missing_rows = list(csv_reader)
 
-    # Separate header and data
-    header = missing_rows[0]
-    missing_rows = missing_rows[1:]
+        # Separate header and data
+        header = missing_rows[0]
+        missing_rows = missing_rows[1:]
 
-    # Retrieve existing data from the sheet
-    range_name = f"{sheet_name}!{range}"  # Adjust the range as needed
-    result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range_name).execute()
-    existing_data = result.get("values", [])
+        # Retrieve existing data from the sheet
+        range_name = f"{sheet_name}!{range}"  # Adjust the range as needed
+        result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range_name).execute()
+        existing_data = result.get("values", [])
 
-    # Determine the number of columns in the full sheet
-    full_range = service.spreadsheets().get(spreadsheetId=SPREADSHEET_ID).execute()
-    total_columns = full_range["sheets"][0]["properties"]["gridProperties"]["columnCount"]
-    # Determine the start and end columns of the specified range
-    start_column = ord(range.split(":")[0][0]) - ord("A")
-    end_column = ord(range.split(":")[1][0]) - ord("A") + 1
+        # Determine the number of columns in the full sheet
+        sheet_metadata = service.spreadsheets().get(spreadsheetId=SPREADSHEET_ID).execute()
+        total_columns = sheet_metadata["sheets"][0]["properties"]["gridProperties"]["columnCount"]
 
-    # Pad missing rows with empty cells before and after the range
-    padded_missing_rows = [
-        [""] * empty_columns_count + [""] * start_column + row + [""] * (total_columns - end_column)
-        for row in missing_rows
-    ]
+        # Determine the start and end columns of the specified range
+        start_column = ord(range.split(":")[0][0]) - ord("A")
+        end_column = ord(range.split(":")[1][0]) - ord("A") + 1
 
-    # Combine header, existing data, and padded missing rows
-    updated_data = [existing_data[0]] + padded_missing_rows + existing_data[1:]
+        # Pad missing rows with empty cells before and after the range
+        padded_missing_rows = [
+            [""] * empty_columns_count + row + [""] * (total_columns - len(row) - empty_columns_count)
+            for row in missing_rows
+        ]
 
-    # Write the updated data back to the sheet
-    body = {"values": updated_data}
-    service.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID,
-        range=f"{sheet_name}!A1",
-        valueInputOption="RAW",
-        body=body,
-    ).execute()
+        # Combine header, existing data, and padded missing rows
+        updated_data = [existing_data[0]] + padded_missing_rows + existing_data[1:]
 
-    print(f"Missing rows have been prepended below the header in the sheet: {sheet_name}")
+        # Write the updated data back to the sheet
+        body = {"values": updated_data}
+        service.spreadsheets().values().update(
+            spreadsheetId=SPREADSHEET_ID,
+            range=f"{sheet_name}!A1",
+            valueInputOption="RAW",
+            body=body,
+        ).execute()
+
+        print(f"Missing rows have been prepended below the header in the sheet: {sheet_name}")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 
@@ -161,7 +196,7 @@ def merge():
 
         find_new_rows("leie/analyzed.csv", "leie/_sheets.csv", "leie/_sheets_missing.csv", emptyColCount)
 
-        # prepend_missing_rows(service, "test", "leie/_sheets_missing.csv", range, emptyColCount)
+        prepend_missing_rows(service, "test", "leie/_sheets_missing.csv", range, emptyColCount)
         print(f"Data successfully updated.")
     except HttpError as err:
         print(err)
