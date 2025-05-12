@@ -120,8 +120,7 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path, range):
 
     # Determine the number of columns in the full sheet
     full_range = service.spreadsheets().get(spreadsheetId=SPREADSHEET_ID).execute()
-    total_columns = len(full_range["sheets"][0]["properties"]["gridProperties"]["columnCount"])
-
+    total_columns = full_range["sheets"][0]["properties"]["gridProperties"]["columnCount"]
     # Determine the start and end columns of the specified range
     start_column = ord(range.split(":")[0][0]) - ord("A")
     end_column = ord(range.split(":")[1][0]) - ord("A") + 1
@@ -154,7 +153,7 @@ def merge():
         creds = get_credentials()
         service = build("sheets", "v4", credentials=creds)
 
-        range1 = "B1:K1000"
+        range1 = "A1:Z1000"
 
         download_sheet_as_csv(service, "test", "leie/_sheets.csv", range1)
 
