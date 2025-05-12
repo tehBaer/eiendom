@@ -51,9 +51,9 @@ def read_csv(file_path):
     return data
 
 
-def download_sheet_as_csv(service, sheet_name, output_file):
+def download_sheet_as_csv(service, sheet_name, output_file, range):
     """Download data from a specific sheet and save it as a CSV file."""
-    range_name = f"{sheet_name}!A1:Z1000"  # Adjust the range as needed
+    range_name = f"{sheet_name}!{range}"  # Adjust the range as needed
     result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range_name).execute()
     data = result.get("values", [])
 
@@ -102,8 +102,8 @@ def find_new_rows(analyzed_path, sheets_path, output_path):
 
 import csv
 
-def prepend_missing_rows(service, sheet_name, missing_rows_path):
-    """Prepend missing rows to the top of the specified sheet, maintaining extra column alignment."""
+def prepend_missing_rows(service, sheet_name, missing_rows_path, range):
+    """Prepend missing rows to the top of the specified sheet, filling columns before and after the range with empty cells."""
     # Read missing rows from the CSV file
     with open(missing_rows_path, "r", encoding="utf-8") as file:
         csv_reader = csv.reader(file)
@@ -114,24 +114,32 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path):
     missing_rows = missing_rows[1:]
 
     # Retrieve existing data from the sheet
-    range_name = f"{sheet_name}!A1:Z1000"  # Adjust the range as needed
+    range_name = f"{sheet_name}!{range}"  # Adjust the range as needed
     result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range_name).execute()
     existing_data = result.get("values", [])
 
-    # Determine the number of columns in the existing data
-    max_columns = max(len(row) for row in existing_data) if existing_data else len(header)
+    # Determine the number of columns in the full sheet
+    full_range = service.spreadsheets().get(spreadsheetId=SPREADSHEET_ID).execute()
+    total_columns = len(full_range["sheets"][0]["properties"]["gridProperties"]["columnCount"])
 
-    # Pad missing rows to match the number of columns in the existing data
-    padded_missing_rows = [row + [""] * (max_columns - len(row)) for row in missing_rows]
+    # Determine the start and end columns of the specified range
+    start_column = ord(range.split(":")[0][0]) - ord("A")
+    end_column = ord(range.split(":")[1][0]) - ord("A") + 1
+
+    # Pad missing rows with empty cells before and after the range
+    padded_missing_rows = [
+        [""] * start_column + row + [""] * (total_columns - end_column)
+        for row in missing_rows
+    ]
 
     # Combine header, padded missing rows, and existing data
-    updated_data = [header] + padded_missing_rows + existing_data[1:]  # Keep the original header
+    updated_data = padded_missing_rows + existing_data
 
     # Write the updated data back to the sheet
     body = {"values": updated_data}
     service.spreadsheets().values().update(
         spreadsheetId=SPREADSHEET_ID,
-        range=range_name,
+        range=f"{sheet_name}!A1",
         valueInputOption="RAW",
         body=body,
     ).execute()
@@ -146,11 +154,13 @@ def merge():
         creds = get_credentials()
         service = build("sheets", "v4", credentials=creds)
 
-        download_sheet_as_csv(service, "test", "leie/_sheets.csv")
+        range1 = "B1:K1000"
+
+        download_sheet_as_csv(service, "test", "leie/_sheets.csv", range1)
 
         find_new_rows("leie/analyzed.csv", "leie/_sheets.csv", "leie/_sheets_missing.csv")
 
-        prepend_missing_rows(service, "test", "leie/_sheets_missing.csv")
+        prepend_missing_rows(service, "test", "leie/_sheets_missing.csv", range1)
         print(f"Data successfully updated.")
     except HttpError as err:
         print(err)
