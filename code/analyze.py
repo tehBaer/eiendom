@@ -1,6 +1,9 @@
 ﻿import pandas as pd
 
 
+import pandas as pd
+
+
 def analyze(emptyColumnsCount):
     # Read the CSV file into a DataFrame
     file_path = 'leie/extracted.csv'
@@ -14,6 +17,10 @@ def analyze(emptyColumnsCount):
     # Format capitalization
     df['Adresse'] = df['Adresse'].str.title()
 
+    # Convert AREAL and Depositum to integers
+    df['AREAL'] = df['AREAL'].astype(int)
+    df['Depositum'] = df['Depositum'].fillna(0).astype(int)
+
     # Drop columns that are completely empty
     df = df.drop(columns=['Primærrom',
                           'Internt bruksareal (BRA-i)',
@@ -23,8 +30,7 @@ def analyze(emptyColumnsCount):
                           'Bruttoareal'
                           ])
 
-
-    #  Add empty columns
+    # Add empty columns
     for i in range(emptyColumnsCount):
         df.insert(0, f'Empty{i + 1}', '')
 
