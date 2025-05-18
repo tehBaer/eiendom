@@ -1,13 +1,9 @@
 ﻿import pandas as pd
+from pandas import DataFrame
 
 
-import pandas as pd
-
-
-def analyze(emptyColumnsCount = 0):
+def cleanData(df:DataFrame):
     # Read the CSV file into a DataFrame
-    file_path = 'leie/extracted.csv'
-    df = pd.read_csv(file_path)
 
     df['AREAL'] = df['Primærrom'].fillna(df['Internt bruksareal (BRA-i)']).fillna(df['Bruksareal'])
 
@@ -30,13 +26,13 @@ def analyze(emptyColumnsCount = 0):
                           'Bruttoareal'
                           ])
 
-    # Add empty columns
-    # for i in range(emptyColumnsCount):
-    #     df.insert(0, f'Empty{i + 1}', '')
-
     # Save to analyze.csv
-    df.to_csv('leie/analyzed.csv', index=False)
+    df.to_csv('leie/cleaned.csv', index=False)
+
+    return df
 
 # if main
 if __name__ == "__main__":
-    analyze(0)
+    file_path = 'leie/extracted.csv'
+    df = pd.read_csv(file_path)
+    cleanData(df)

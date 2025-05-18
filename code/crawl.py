@@ -67,12 +67,13 @@ def extract_URLs(url, searchTerm, name):
     # Save the DataFrame as a CSV file inside the folder
     df.to_csv(os.path.join(name, 'crawled.csv'), index=False)
     print("Crawling completed. Results saved to 'crawled.csv'.")
+    return df
 
 
-def executePredefinedSearch():
+def getURLsFromPredefinedSearch():
     urlBase = 'https://www.finn.no/realestate/lettings/search.html?lat=59.922591746076556&lon=10.73632512241602&radius=7000&price_to=18500&price_from=13000&start_month=202507&start_month=202508&stored-id=79416555&start_month=202509&area_from=30'
     regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
     extract_URLs(urlBase, regex, "leie")
 
 if __name__ == "__main__":
-    executePredefinedSearch()
+    getURLsFromPredefinedSearch()

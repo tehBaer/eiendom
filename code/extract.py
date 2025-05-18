@@ -2,13 +2,15 @@
 import subprocess
 import time
 import pandas as pd
+from pandas import DataFrame
+
 from utils import *
 
 # Ensure the path to the virtual environment activation script is correct
 subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
 
-def extract_data(url, index, name, saveToHTML=False):
+def extract_ad_data(url, index, name, saveToHTML=False):
     response = requests.get(url)
     response.raise_for_status()
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -50,23 +52,22 @@ def extract_data(url, index, name, saveToHTML=False):
         'Bruttoareal': sizes.get('info-gross-area'),
     }
 
-def executePredefinedCrawl():
+def extractDataFromAds(name : str, urls:DataFrame):
     # Create the directory if it doesn't exist
-    name = "leie"
     os.makedirs(name, exist_ok=True)
 
     # Read URLs from the crawl
-    urls_df = pd.read_csv(f'{name}/crawled.csv')
+    # urls = pd.read_csv(f'{name}/crawled.csv')
     collectedData = []
 
     # Loop through each URL and extract property data
     try:
         # Create a folder inside the previous folder for the htmls
         os.makedirs(f'{name}/html_extracted', exist_ok=True)
-        for index, url in enumerate(urls_df['URL']):
+        for index, url in enumerate(urls['URL']):
             time.sleep(random.uniform(0.1, 0.1))
             try:
-                data = extract_data(url, index, name)
+                data = extract_ad_data(url, index, name)
                 print(f'Index {index}: {data}')
                 collectedData.append(data)
             except Exception as e:
@@ -75,8 +76,10 @@ def executePredefinedCrawl():
         # Save the combined data to a new CSV file in the output directory
         df = pd.DataFrame(collectedData)
         df.to_csv(f'{name}/extracted.csv', index=False)
-        print('CSV file has been written.')
+        print(f"Data extraction completed. {len(collectedData)} records saved to {name}/extracted.csv")
+        return df
 
 
 if __name__ == "__main__":
-    executePredefinedCrawl()
+
+    extractDataFromAds('leie', pd.read_csv('leie/crawled.csv'))
