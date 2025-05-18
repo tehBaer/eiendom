@@ -131,8 +131,10 @@ def find_new_rows(analyzed_path, sheets_path, output_path, empty_columns_count):
         print(f"An error occurred: {e}")
 
 
+import csv
+
 def prepend_missing_rows(service, sheet_name, missing_rows_path, range, empty_columns_count):
-    """Prepend missing rows below the header of the specified sheet, filling columns before and after the range with empty cells."""
+    """Prepend missing rows below the header of the specified sheet, ensuring numeric values are recognized as numbers."""
     try:
         # Read missing rows from the CSV file
         with open(missing_rows_path, "r", encoding="utf-8") as file:
@@ -143,16 +145,16 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path, range, empty_co
         header = missing_rows[0]
         missing_rows = missing_rows[1:]
 
-        # Retrieve existing data from the sheet
-        range_name = f"{sheet_name}!{range}"  # Adjust the range as needed
-        result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range_name).execute()
-        existing_data = result.get("values", [])
-
         # Ensure each row has exactly `empty_columns_count` empty cells at the start
         padded_missing_rows = [
             ([""] * empty_columns_count + row[empty_columns_count:])[:len(header)]
             for row in missing_rows
         ]
+
+        # Retrieve existing data from the sheet
+        range_name = f"{sheet_name}!{range}"  # Adjust the range as needed
+        result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range_name).execute()
+        existing_data = result.get("values", [])
 
         # Combine header, existing data, and padded missing rows
         updated_data = [existing_data[0]] + padded_missing_rows + existing_data[1:]
@@ -162,7 +164,7 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path, range, empty_co
         service.spreadsheets().values().update(
             spreadsheetId=SPREADSHEET_ID,
             range=f"{sheet_name}!A1",
-            valueInputOption="RAW",
+            valueInputOption="USER_ENTERED",  # Use USER_ENTERED to preserve formatting
             body=body,
         ).execute()
 
@@ -192,4 +194,4 @@ def merge(emptyColCount, sheet_name):
 
 
 if __name__ == "__main__":
-    merge(2, "Main")
+    merge(2, "Copy of Main")

@@ -13,11 +13,9 @@ executePredefinedSearch()
 executePredefinedCrawl()
 
 
-emptyColCount = 2
 # 3
 analyze()
 
 # 4
-
-
+emptyColCount = 2
 merge(emptyColCount, "Main")
