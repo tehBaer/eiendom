@@ -5,13 +5,13 @@ import pandas as pd
 import csv
 
 
-def find_new_rows(analyzed_path, sheets_path, output_path, empty_columns_count):
+def find_new_rows(analyzed_path, saved_all_path, output_path, empty_columns_count):
     """Find rows in analyzed.csv not present in sheets.csv and save them to a new CSV."""
     try:
         # Load the CSV files
         analyzed_df = pd.read_csv(analyzed_path)
         sheets_df = pd.read_csv(
-            sheets_path,
+            saved_all_path,
             header=None,
             names=['Index', 'Finnkode', 'Tilgjengelighet', 'Adresse', 'Postnummer', 'Leiepris',
                    'Depositum', 'URL', 'AREAL', 'PRIS KVM'],
@@ -90,23 +90,27 @@ def prepend_missing_rows(service, sheet_name, missing_rows_path, range, empty_co
         print(f"An error occurred: {e}")
 
 
-def merge(emptyColCount, sheet_name):
+def merge(emptyColCount, sheet_name, cleaned_path, saved_all_path, live_missing_path, range="A1:Z1000"):
     """Main function to export data to Google Sheets."""
     try:
         creds = get_credentials()
         service = build("sheets", "v4", credentials=creds)
 
-        range = "A1:Z1000"
+        download_sheet_as_csv(service, sheet_name, saved_all_path, range)
 
-        # download_sheet_as_csv(service, sheet_name, "leie/_sheets.csv", range)
+        find_new_rows(cleaned_path, saved_all_path, live_missing_path, emptyColCount)
 
-        find_new_rows("leie/cleaned.csv", "leie/_sheets.csv", "leie/_sheets_missing.csv", emptyColCount)
-
-        prepend_missing_rows(service, sheet_name, "leie/_sheets_missing.csv", range, emptyColCount)
+        prepend_missing_rows(service, sheet_name, live_missing_path, range, emptyColCount)
         print(f"Data successfully updated.")
     except HttpError as err:
         print(err)
 
 
 if __name__ == "__main__":
-    merge(2, "Copy of Main")
+    merge(
+        emptyColCount=2,
+        sheet_name="Main",
+        cleaned_path="leie/live_data_cleaned.csv",
+        saved_all_path="leie/saved_all.csv",
+        live_missing_path="leie/live_missing.csv"
+    )

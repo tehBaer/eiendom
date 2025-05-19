@@ -17,12 +17,12 @@ urls = extract_URLs(urlBase, regex, projectName, "live_URLs.csv")
 
 # 2
 # urls = pd.read_csv(f'{projectName}/live_URLs.csv')
-data = extractDataFromAds(projectName, urls, "live_data.csv")
+# extractDataFromAds(projectName, urls, "live_data.csv")
 
 # ALso extract data from the downloaded sheets
 
 # 3
-# data = pd.read_csv(f'{projectName}/live_data.csv')
+data = pd.read_csv(f'{projectName}/live_data.csv')
 cleanedData = cleanData(data, projectName, "live_data_cleaned.csv")
 
 # 4

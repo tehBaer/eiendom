@@ -2,10 +2,19 @@
 from pandas import DataFrame
 
 
-def cleanData(df:DataFrame, projectName:str, outputFileName:str):
-    # Read the CSV file into a DataFrame
+import pandas as pd
+from pandas import DataFrame
 
+
+def cleanData(df: DataFrame, projectName: str, outputFileName: str):
+    # Fill AREAL column
     df['AREAL'] = df['Primærrom'].fillna(df['Internt bruksareal (BRA-i)']).fillna(df['Bruksareal'])
+
+    # Convert AREAL to numeric, coercing errors to NaN
+    df['AREAL'] = pd.to_numeric(df['AREAL'], errors='coerce')
+
+    # Drop rows where AREAL or Leiepris is NaN
+    df = df.dropna(subset=['AREAL', 'Leiepris'])
 
     # Calculate and add 'PRIS KVM' column
     df['PRIS KVM'] = (df['Leiepris'].astype(float) / df['AREAL'].astype(float)).astype(int)
@@ -17,7 +26,7 @@ def cleanData(df:DataFrame, projectName:str, outputFileName:str):
     df['AREAL'] = df['AREAL'].astype(int)
     df['Depositum'] = df['Depositum'].fillna(0).astype(int)
 
-    # Drop columns that are completely empty
+    # Drop unnecessary columns
     df = df.drop(columns=['Primærrom',
                           'Internt bruksareal (BRA-i)',
                           'Bruksareal',
