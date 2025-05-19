@@ -2,7 +2,7 @@
 from pandas import DataFrame
 
 
-def cleanData(df:DataFrame):
+def cleanData(df:DataFrame, projectName:str, outputFileName:str):
     # Read the CSV file into a DataFrame
 
     df['AREAL'] = df['Primærrom'].fillna(df['Internt bruksareal (BRA-i)']).fillna(df['Bruksareal'])
@@ -27,7 +27,7 @@ def cleanData(df:DataFrame):
                           ])
 
     # Save to analyze.csv
-    df.to_csv('leie/cleaned.csv', index=False)
+    df.to_csv(f'{projectName}/{outputFileName}', index=False)
 
     return df
 

@@ -44,19 +44,19 @@ def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
     return df, len(matches)
 
 
-def extract_URLs(url, searchTerm, name):
+def extract_URLs(url, searchTerm, projectname, outputFileName:str):
     # Initialize an empty DataFrame
     df = pd.DataFrame(columns=['URL'])
 
     # Create a folder in the parent directory of this file if it doesn't exist
-    os.makedirs(name, exist_ok=True)
+    os.makedirs(projectname, exist_ok=True)
 
     # Create a folder inside the previous folder for the HTMLs
-    os.makedirs(os.path.join(name, 'html_crawled'), exist_ok=True)
+    os.makedirs(os.path.join(projectname, 'html_crawled'), exist_ok=True)
 
     page = 1
     while True:
-        folder = os.path.join(name, 'html_crawled')
+        folder = os.path.join(projectname, 'html_crawled')
         df, match_count = parse_resultpage(url, searchTerm, folder, page, df)
         if match_count == 0:
             print("No more results found. Stopping.")
@@ -65,15 +65,15 @@ def extract_URLs(url, searchTerm, name):
         time.sleep(random.uniform(100, 500) / 1000)
 
     # Save the DataFrame as a CSV file inside the folder
-    df.to_csv(os.path.join(name, 'crawled.csv'), index=False)
-    print("Crawling completed. Results saved to 'crawled.csv'.")
+    df.to_csv(os.path.join(projectname, outputFileName), index=False)
+    print("Crawling completed. Results saved to ", os.path.join(projectname, outputFileName))
     return df
 
 
 def getURLsFromPredefinedSearch():
     urlBase = 'https://www.finn.no/realestate/lettings/search.html?lat=59.922591746076556&lon=10.73632512241602&radius=7000&price_to=18500&price_from=13000&start_month=202507&start_month=202508&stored-id=79416555&start_month=202509&area_from=30'
     regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
-    extract_URLs(urlBase, regex, "leie")
+    extract_URLs(urlBase, regex, "leie", "crawled.csv")
 
 if __name__ == "__main__":
     getURLsFromPredefinedSearch()

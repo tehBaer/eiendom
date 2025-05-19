@@ -13,7 +13,7 @@ def find_new_rows(analyzed_path, sheets_path, output_path, empty_columns_count):
         sheets_df = pd.read_csv(
             sheets_path,
             header=None,
-            names=['Index', 'Finnkode', 'Utleid', 'Adresse', 'Postnummer', 'Leiepris',
+            names=['Index', 'Finnkode', 'Tilgjengelighet', 'Adresse', 'Postnummer', 'Leiepris',
                    'Depositum', 'URL', 'AREAL', 'PRIS KVM'],
             on_bad_lines='skip'
         )
@@ -22,27 +22,14 @@ def find_new_rows(analyzed_path, sheets_path, output_path, empty_columns_count):
         analyzed_df['Finnkode'] = analyzed_df['Finnkode'].astype(str).str.strip()
         sheets_df['Finnkode'] = sheets_df['Finnkode'].astype(str).str.strip()
 
-        # Debug: Print unique Finnkode values
-        print("Unique Finnkode in analyzed.csv:", analyzed_df['Finnkode'].unique())
-        print("Unique Finnkode in sheets.csv:", sheets_df['Finnkode'].unique())
 
         # Align columns for comparison
         common_columns = analyzed_df.columns.intersection(sheets_df.columns)
         analyzed_df = analyzed_df[common_columns]
         sheets_df = sheets_df[common_columns]
 
-        # Debug: Print aligned DataFrames
-        print("Aligned analyzed_df:")
-        print(analyzed_df.head())
-        print("Aligned sheets_df:")
-        print(sheets_df.head())
-
         # Find rows in analyzed.csv not in sheets.csv
         missing_finnkode = analyzed_df[~analyzed_df['Finnkode'].isin(sheets_df['Finnkode'])]
-
-        # Debug: Print missing rows
-        print("Missing rows:")
-        print(missing_finnkode)
 
         # Check if there are missing rows
         if missing_finnkode.empty:
@@ -111,7 +98,7 @@ def merge(emptyColCount, sheet_name):
 
         range = "A1:Z1000"
 
-        download_sheet_as_csv(service, sheet_name, "leie/_sheets.csv", range)
+        # download_sheet_as_csv(service, sheet_name, "leie/_sheets.csv", range)
 
         find_new_rows("leie/cleaned.csv", "leie/_sheets.csv", "leie/_sheets_missing.csv", emptyColCount)
 

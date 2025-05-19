@@ -30,15 +30,15 @@ def extract_ad_data(url, index, name, saveToHTML=False):
     prices = getRentPrice(soup)
     div_element = soup.find('div',
                             class_='!text-m mb-24 py-4 px-8 border-0 rounded-4 text-xs inline-flex bg-[--w-color-badge-warning-background] s-text')
-    text = None
+    tilgjengelig = None
     if div_element:
         # Extract the text from the div element
-        text = div_element.get_text(strip=True)
+        tilgjengelig = div_element.get_text(strip=True)
 
-    return {
+    data = {
         'Index': index,
         'Finnkode': url.split('finnkode=')[1],
-        'Utleid': text,
+        'Tilgjengelighet': tilgjengelig,
         'Adresse': address,
         'Postnummer': area,
         'Leiepris': prices.get('monthly'),
@@ -51,13 +51,15 @@ def extract_ad_data(url, index, name, saveToHTML=False):
         'Balkong/Terrasse (TBA)': sizes.get('info-open-area'),
         'Bruttoareal': sizes.get('info-gross-area'),
     }
+    print(f'Index {index}: {data}')
 
-def extractDataFromAds(name : str, urls:DataFrame):
+    return data
+
+
+def extractDataFromAds(name : str, urls:DataFrame, outputFileName:str):
     # Create the directory if it doesn't exist
     os.makedirs(name, exist_ok=True)
 
-    # Read URLs from the crawl
-    # urls = pd.read_csv(f'{name}/crawled.csv')
     collectedData = []
 
     # Loop through each URL and extract property data
@@ -68,18 +70,17 @@ def extractDataFromAds(name : str, urls:DataFrame):
             time.sleep(random.uniform(0.1, 0.1))
             try:
                 data = extract_ad_data(url, index, name)
-                print(f'Index {index}: {data}')
                 collectedData.append(data)
             except Exception as e:
                 print(f'Error processing URL at index {index}: {url} - {e}')
     finally:
         # Save the combined data to a new CSV file in the output directory
         df = pd.DataFrame(collectedData)
-        df.to_csv(f'{name}/extracted.csv', index=False)
-        print(f"Data extraction completed. {len(collectedData)} records saved to {name}/extracted.csv")
+        df.to_csv(f'{name}/{outputFileName}', index=False)
+        print(f"Data extraction completed. {len(collectedData)} records saved to {name}/{outputFileName}")
         return df
 
 
 if __name__ == "__main__":
 
-    extractDataFromAds('leie', pd.read_csv('leie/crawled.csv'))
+    extractDataFromAds('leie', pd.read_csv('leie/crawled.csv'), 'extracted.csv')
