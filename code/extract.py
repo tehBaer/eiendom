@@ -28,12 +28,16 @@ def extract_ad_data(url, index, name, saveToHTML=False):
     address, area = getAddress(soup)
     sizes = getAllSizes(soup)
     prices = getRentPrice(soup)
-    div_element = soup.find('div',
-                            class_='!text-m mb-24 py-4 px-8 border-0 rounded-4 text-xs inline-flex bg-[--w-color-badge-warning-background] s-text')
+
+    statuses = ["warning", "negative"]
     tilgjengelig = None
-    if div_element:
-        # Extract the text from the div element
-        tilgjengelig = div_element.get_text(strip=True)
+
+    for status in statuses:
+        searchString = f"!text-m mb-24 py-4 px-8 border-0 rounded-4 text-xs inline-flex bg-[--w-color-badge-{status}-background] s-text"
+        element = soup.find('div', class_=searchString)
+        if element:
+            tilgjengelig = element.get_text(strip=True)
+            break
 
     data = {
         'Index': index,
@@ -56,7 +60,7 @@ def extract_ad_data(url, index, name, saveToHTML=False):
     return data
 
 
-def extractDataFromAds(name : str, urls:DataFrame, outputFileName:str):
+def extractDataFromAds(name: str, urls: DataFrame, outputFileName: str):
     # Create the directory if it doesn't exist
     os.makedirs(name, exist_ok=True)
 
@@ -82,5 +86,4 @@ def extractDataFromAds(name : str, urls:DataFrame, outputFileName:str):
 
 
 if __name__ == "__main__":
-
     extractDataFromAds('leie', pd.read_csv('leie/crawled.csv'), 'extracted.csv')

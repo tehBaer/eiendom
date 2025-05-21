@@ -62,7 +62,7 @@ def extract_URLs(url, searchTerm, projectname, outputFileName:str):
             print("No more results found. Stopping.")
             break
         page += 1
-        time.sleep(random.uniform(100, 500) / 1000)
+        time.sleep(random.uniform(200, 500) / 1000)
 
     # Save the DataFrame as a CSV file inside the folder
     df.to_csv(os.path.join(projectname, outputFileName), index=False)

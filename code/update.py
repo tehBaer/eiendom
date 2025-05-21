@@ -4,7 +4,7 @@ from code.extract import extract_ad_data
 from googleapiclient.discovery import build
 
 
-def FindNewUnavailable(sheet_name:str):
+def FindNewUnavailable(sheet_name: str):
     creds = get_credentials()
     service = build("sheets", "v4", credentials=creds)
     download_sheet_as_csv(service, sheet_name, "leie/saved_all.csv", "A:Z")
@@ -15,10 +15,12 @@ def FindNewUnavailable(sheet_name:str):
     updated_rows = []
 
     for index, row in df_saved.iterrows():
-        # If Tilgjengelighet is Utleid or Slettet, skip the row
-        # if row["Tilgjengelighet"] in ["Utleid", "Slettet"]:
-        #     print(f"Skipping Finnkode {row['Finnkode']} as it is {row['Tilgjengelighet']}")
+        # if (index < 50):
         #     continue
+        # If Tilgjengelighet is already marked as Utleid or Slettet, skip the row
+        if (row["Tilgjengelighet"] == 'Utleid' or row["Tilgjengelighet"] == "Slettet"):
+            print(f"Skipping Finnkode {row['Finnkode']} as it is {row[4]}")
+            continue
         try:
             # Extract data for the URL
             updated_data = extract_ad_data(row["URL"], index, "leie")
@@ -35,8 +37,8 @@ def FindNewUnavailable(sheet_name:str):
     dfdata.to_csv("leie/saved_availability.csv", index=False)
     return dfdata
 
-def PasteNewAvailability(data, sheet_name):
 
+def PasteNewAvailability(data, sheet_name):
     # Initialize the service
     creds = get_credentials()
     service = build("sheets", "v4", credentials=creds)
@@ -61,11 +63,9 @@ def PasteNewAvailability(data, sheet_name):
 
     print(f"{result.get('updatedCells')} cells updated.")
 
+
 if __name__ == "__main__":
     sheetName = "Main"
-    # data = FindNewUnavailable(sheetName)
-    data = pd.read_csv("leie/saved_availability.csv")
+    data = FindNewUnavailable(sheetName)
+    # data = pd.read_csv("leie/saved_availability.csv")
     PasteNewAvailability(data, sheetName)
-
-
-

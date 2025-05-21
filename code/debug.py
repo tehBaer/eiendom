@@ -8,5 +8,5 @@ subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
 # saveToFile("https://www.finn.no/realestate/lettings/ad.html?finnkode=50296946", "html_extracted/page98", "leie")
 
-url = 'https://www.finn.no/realestate/lettings/ad.html?finnkode=405171898'
+url = 'https://www.finn.no/realestate/lettings/ad.html?finnkode=405355098'
 print(extract_ad_data(url, 0, "leie", True))
