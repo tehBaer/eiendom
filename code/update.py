@@ -19,7 +19,11 @@ def FindNewUnavailable(sheet_name: str):
         #     continue
         # If Tilgjengelighet is already marked as Utleid or Slettet, skip the row
         if (row["Tilgjengelighet"] == 'Utleid' or row["Tilgjengelighet"] == "Slettet"):
-            print(f"Skipping Finnkode {row['Finnkode']} as it is {row[4]}")
+            updated_rows.append({
+                "Finnkode": row["Finnkode"],
+                "Tilgjengelighet": row["Tilgjengelighet"],
+            })
+            print(f"Finnkode {row['Finnkode']} is already {row[4]}")
             continue
         try:
             # Extract data for the URL
