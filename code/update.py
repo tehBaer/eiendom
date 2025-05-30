@@ -9,10 +9,10 @@ from googleapiclient.discovery import build
 def FindNewUnavailable(sheet_name: str, columns: str):
     creds = get_credentials()
     service = build("sheets", "v4", credentials=creds)
-    download_sheet_as_csv(service, sheet_name, "leie/saved_all.csv", columns)
+    download_sheet_as_csv(service, sheet_name, "leie/_temp2.csv", columns)
 
     # Load the downloaded data into a DataFrame
-    df_saved = pd.read_csv("leie/saved_all.csv")
+    df_saved = pd.read_csv("leie/_temp2.csv")
 
     updated_rows = []
 
@@ -91,7 +91,7 @@ def get_everything_updated(df_saved: pd.DataFrame):
     data = pd.DataFrame(updated_rows)
     data.to_csv("leie/xx.csv", index=False)
 
-    cleaned_df = cleanData(data, 'leie', 'saved_all_updated(missing deleted).csv')
+    cleaned_df = cleanData(data, 'leie', '_temp.csv')
 
     # If a row has "Slettet", fill inn the values from df_saved instead
     for index, row in cleaned_df.iterrows():
@@ -122,6 +122,6 @@ if __name__ == "__main__":
 
     creds = get_credentials()
     service = build("sheets", "v4", credentials=creds)
-    download_sheet_as_csv(service, "Ne1w", "leie/saved_all.csv", "C:L")
-    df_saved = pd.read_csv("leie/saved_all.csv")
+    download_sheet_as_csv(service, "New", "leie/_temp3.csv", "C:L")
+    df_saved = pd.read_csv("leie/to_paste.csv")
     get_everything_updated(df_saved)

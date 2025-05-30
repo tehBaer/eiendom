@@ -45,6 +45,6 @@ def cleanData(df: DataFrame, projectName: str, outputFileName: str, originalDF: 
 if __name__ == "__main__":
     # file_path = 'leie/live_data.csv'
     # df = pd.read_csv(file_path)
-    # cleanData(df, 'leie', 'live_data_cleaned.csv')
+    # cleanData(df, 'leie', 'live_data_parsed.csv')
 
-    cleanData(pd.read_csv('leie/saved_all_updated.csv'), 'leie', 'saved_all_updated_cleaned.csv')
+    cleanData(pd.read_csv('leie/saved_all_updated.csv'), 'leie', 'saved_all_updated_parsed.csv')

@@ -13,8 +13,10 @@ def find_new_rows(analyzed_path, saved_all_path, output_path, empty_columns_coun
         sheets_df = pd.read_csv(
             saved_all_path,
             header=None,
-            names=['Index', 'Finnkode', 'Tilgjengelighet', 'Adresse', 'Postnummer', 'Leiepris',
-                   'Depositum', 'URL', 'Innflytting', 'Utflytting', 'AREAL', 'PRIS KVM'],
+            names=['Finnkode', 'Tilgjengelighet', 'Adresse', 'Postnummer', 'Leiepris',
+                   'Depositum', 'URL',
+                   # 'Innflytting', 'Utflytting',
+                   'AREAL', 'PRIS KVM'],
             on_bad_lines='skip'
         )
 
@@ -100,7 +102,7 @@ def merge(emptyColCount, sheet_name, cleaned_path, saved_all_path, live_missing_
 
         find_new_rows(cleaned_path, saved_all_path, live_missing_path, emptyColCount)
 
-        prepend_missing_rows(service, sheet_name, live_missing_path, range, emptyColCount)
+        # prepend_missing_rows(service, sheet_name, live_missing_path, range, emptyColCount)
         print(f"Data successfully updated.")
     except HttpError as err:
         print(err)
@@ -110,7 +112,7 @@ if __name__ == "__main__":
     merge(
         emptyColCount=2,
         sheet_name="Main",
-        cleaned_path="leie/live_data_cleaned.csv",
-        saved_all_path="leie/saved_all.csv",
+        cleaned_path="leie/live_data_parsed.csv",
+        saved_all_path="leie/sheet_downloaded.csv",
         live_missing_path="leie/live_missing.csv"
     )
