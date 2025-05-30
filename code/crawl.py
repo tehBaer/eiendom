@@ -24,9 +24,10 @@ def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
     with open(os.path.join(folder, 'page' + str(page) + '.html'), 'w', encoding='utf-8') as file:
         file.write(soup.prettify())
 
-    # Extract the relevant data
+    # Extract all hrefs from <a> tags, then filter with regex
+    hrefs = [a.get('href') for a in soup.find_all('a', href=True)]
     pattern = re.compile(term)
-    matches = {match for match in pattern.findall(str(soup)) if len(match) <= 100}
+    matches = {href for href in hrefs if pattern.match(href) and len(href) <= 100}
 
     full_urls = ['https://www.finn.no' + match for match in matches]
 
@@ -73,7 +74,7 @@ def extract_URLs(url, searchTerm, projectname, outputFileName:str):
 def getURLsFromPredefinedSearch():
     urlBase = 'https://www.finn.no/realestate/lettings/search.html?lat=59.922591746076556&lon=10.73632512241602&radius=7000&price_to=18500&price_from=13000&start_month=202507&start_month=202508&stored-id=79416555&start_month=202509&area_from=30'
     regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
-    extract_URLs(urlBase, regex, "leie", "crawled.csv")
+    extract_URLs(urlBase, regex, "leie", "live_URLs.csv")
 
 if __name__ == "__main__":
     getURLsFromPredefinedSearch()

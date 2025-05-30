@@ -26,7 +26,6 @@ def get_ad_content(url, projectName, auto_save_new=True, force_save=False):
         return save_ad_html_content(url, projectName, finnkode)
 
     elif (exists or not auto_save_new):
-        print(f"HTML content for {finnkode} already exists. Skipping download.")
         with open(html_file_path, 'r', encoding='utf-8') as file:
             soup = BeautifulSoup(file.read(), 'html.parser')
             return soup
@@ -47,7 +46,14 @@ def save_ad_html_content(url, projectName, finnkode):
 
 
 def extract_ad_data(url, index, projectName):
-    soup = get_ad_content(url, projectName)
+    try:
+        soup = get_ad_content(url, projectName)
+    except Exception as e:
+        print(f"Error fetching content for URL {url}: {e}")
+        #     throw exception
+        raise
+
+
 
     address, area = getAddress(soup)
     sizes = getAllSizes(soup)
@@ -65,7 +71,7 @@ def extract_ad_data(url, index, projectName):
             break
 
     data = {
-        'Index': index,
+        # 'Index': index,
         'Finnkode': url.split('finnkode=')[1],
         'Tilgjengelighet': tilgjengelig,
         'Adresse': address,
@@ -79,8 +85,8 @@ def extract_ad_data(url, index, projectName):
         'Eksternt bruksareal (BRA-e)': sizes.get('info-usable-e-area'),
         'Balkong/Terrasse (TBA)': sizes.get('info-open-area'),
         'Bruttoareal': sizes.get('info-gross-area'),
-        'Innflytting': date.get('start'),
-        'Utflytting': date.get('end'),
+        # 'Innflytting': date.get('start'),
+        # 'Utflytting': date.get('end'),
     }
     print(f'Index {index}: {data}')
 
@@ -98,7 +104,7 @@ def extractDataFromAds(projectName: str, urls: DataFrame, outputFileName: str):
         # Create a folder inside the previous folder for the htmls
         os.makedirs(f'{projectName}/html_extracted', exist_ok=True)
         for index, url in enumerate(urls['URL']):
-            time.sleep(random.uniform(0.1, 0.1))
+            time.sleep(random.uniform(0.1, 0.1)) #todo do a deltatime instead of a fixed sleep time
             try:
                 data = extract_ad_data(url, index, projectName)
                 collectedData.append(data)

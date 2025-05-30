@@ -6,10 +6,10 @@ from code.extract import extract_ad_data
 from googleapiclient.discovery import build
 
 
-def FindNewUnavailable(sheet_name: str):
+def FindNewUnavailable(sheet_name: str, columns: str):
     creds = get_credentials()
     service = build("sheets", "v4", credentials=creds)
-    download_sheet_as_csv(service, sheet_name, "leie/saved_all.csv", "A:Z")
+    download_sheet_as_csv(service, sheet_name, "leie/saved_all.csv", columns)
 
     # Load the downloaded data into a DataFrame
     df_saved = pd.read_csv("leie/saved_all.csv")
@@ -19,24 +19,21 @@ def FindNewUnavailable(sheet_name: str):
     for index, row in df_saved.iterrows():
         # if (index < 50):
         #     continue
-        # If Tilgjengelighet is already marked as Utleid or Slettet, skip the row
-        if (row["Tilgjengelighet"] == 'Utleid' or row["Tilgjengelighet"] == "Slettet"):
-            updated_rows.append({
-                "Finnkode": row["Finnkode"],
-                "Tilgjengelighet": row["Tilgjengelighet"],
-            })
-            print(f"Finnkode {row['Finnkode']} is already {row[4]}")
-            continue
+        # If Tilgjengelighet is already marked as Utleid or Slettet, | the row
+        # if (row["Tilgjengelighet"] == 'Utleid' or row["Tilgjengelighet"] == "Slettet"):
+        #     updated_rows.append({
+        #         "Finnkode": row["Finnkode"],
+        #         "Tilgjengelighet": row["Tilgjengelighet"],
+        #     })
+        #     print(f"Finnkode {row['Finnkode']} is already {row["Tilgjengelighet"]}")
+        #     continue
         try:
             # Extract data for the URL
             updated_data = extract_ad_data(row["URL"], index, "leie")
             updated_rows.append(updated_data)
         except Exception as e:
             print(f"Error processing URL at index {index}: {row['Finnkode']} - {e}")
-            updated_rows.append({
-                "Finnkode": row["Finnkode"],
-                "Tilgjengelighet": "Slettet",
-            })
+            updated_rows.append(row)
 
     data = pd.DataFrame(updated_rows)
     dfdata = data[["Finnkode", "Tilgjengelighet"]]
@@ -70,41 +67,61 @@ def PasteNewAvailability(data, sheet_name):
     print(f"{result.get('updatedCells')} cells updated.")
 
 
-def UpdateEverything():
-    # Load the saved data
-    df_saved = pd.read_csv("leie/saved_all.csv")
+def get_everything_updated(df_saved: pd.DataFrame):
 
     updated_rows = []
-
     for index, row in df_saved.iterrows():
-        if not (40< index < 50):
-            # temporary limit for testing
-            continue
+        # temporary limit for testing
+        # if not (600 < index):
+        #     continue
+        # if not (index<3):
+        #     continue
         try:
             # Extract data for the URL
             updated_data = extract_ad_data(row["URL"], index, "leie")
             updated_rows.append(updated_data)
         except Exception as e:
-            print(f"Error processing URL at index {index}: {row['Finnkode']} - {e}")
-            # TODO this should keep the old data also
+            # print(f"Error processing URL at index {index}: {row['Finnkode']} - {e}")
             updated_rows.append({
                 "Finnkode": row["Finnkode"],
                 "Tilgjengelighet": "Slettet",
             })
 
-    # Clean
-
     # Save the updated data to a new CSV file
     data = pd.DataFrame(updated_rows)
-    cleanData(data, 'leie', 'saved_all_updated.csv')
-    # data.to_csv("leie/saved_all_updated.csv", index=False)
+    data.to_csv("leie/xx.csv", index=False)
+
+    cleaned_df = cleanData(data, 'leie', 'saved_all_updated(missing deleted).csv')
+
+    # If a row has "Slettet", fill inn the values from df_saved instead
+    for index, row in cleaned_df.iterrows():
+        if row["Tilgjengelighet"] == "Slettet":
+            original_row = df_saved[df_saved["Finnkode"] == row["Finnkode"]]
+            if not original_row.empty:
+                cleaned_df.loc[index, "Adresse"] = original_row.iloc[0]["Adresse"]
+                cleaned_df.loc[index, "Leiepris"] = original_row.iloc[0]["Leiepris"]
+                cleaned_df.loc[index, "Depositum"] = original_row.iloc[0]["Depositum"]
+                cleaned_df.loc[index, "URL"] = original_row.iloc[0]["URL"]
+                value = pd.to_numeric(original_row.iloc[0]["AREAL"], errors="coerce")
+                cleaned_df.loc[index, "AREAL"] = value
+                value = pd.to_numeric(original_row.iloc[0]["PRIS KVM"], errors="coerce")
+                cleaned_df.loc[index, "PRIS KVM"] = value
+
+
+    cleaned_df.to_csv("leie/saved_all_updated.csv", index=False)
+
     print("Updated data saved to leie/saved_all_updated.csv")
 
+
 if __name__ == "__main__":
-    sheetName = "test"
-    # data = FindNewUnavailable(sheetName)
+    sheetName = "New"
+    # data = FindNewUnavailable(sheetName, "C:L")
     # data = pd.read_csv("leie/saved_availability.csv")
     # PasteNewAvailability(data, sheetName)
 
-    UpdateEverything()
 
+    creds = get_credentials()
+    service = build("sheets", "v4", credentials=creds)
+    download_sheet_as_csv(service, "Ne1w", "leie/saved_all.csv", "C:L")
+    df_saved = pd.read_csv("leie/saved_all.csv")
+    get_everything_updated(df_saved)
