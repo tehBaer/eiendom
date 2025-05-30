@@ -18,7 +18,6 @@ extractDataFromAds(projectName, urls, "live_data.csv")
 # ALso extract data from the downloaded sheets
 
 data = pd.read_csv(f'{projectName}/live_data.csv')
-# 3
 cleanData(data, projectName, "live_data_cleaned.csv")
 
 # 4

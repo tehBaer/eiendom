@@ -14,7 +14,7 @@ def find_new_rows(analyzed_path, saved_all_path, output_path, empty_columns_coun
             saved_all_path,
             header=None,
             names=['Index', 'Finnkode', 'Tilgjengelighet', 'Adresse', 'Postnummer', 'Leiepris',
-                   'Depositum', 'URL', 'AREAL', 'PRIS KVM'],
+                   'Depositum', 'URL', 'Innflytting', 'Utflytting', 'AREAL', 'PRIS KVM'],
             on_bad_lines='skip'
         )
 

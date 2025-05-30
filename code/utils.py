@@ -127,6 +127,22 @@ def getRentPrice(soup):
         'deposit': deposit_price
     }
 
+def getDate(soup):
+    output = ""
+    timespan_element = soup.find('div', {'data-testid': 'info-timespan'})
+    if timespan_element:
+        date_element = timespan_element.find('dd', class_='m-0 font-bold')
+        if date_element:
+            output= date_element.get_text(strip=True)
+    if output:
+    #     strip it, and split it on "-"
+        output = output.strip().split('-')
+        return {
+            'start': output[0],
+            'end': output[1] if len(output) > 1 else None
+        }
+    return None
+
 
 def removeSpaces(string):
     return string.replace('\xa0', '').replace(' ', '')

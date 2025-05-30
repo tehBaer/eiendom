@@ -1,4 +1,6 @@
 ﻿import pandas as pd
+
+from code.clean import cleanData
 from code.googleUtils import download_sheet_as_csv, get_credentials, SPREADSHEET_ID
 from code.extract import extract_ad_data
 from googleapiclient.discovery import build
@@ -68,8 +70,41 @@ def PasteNewAvailability(data, sheet_name):
     print(f"{result.get('updatedCells')} cells updated.")
 
 
+def UpdateEverything():
+    # Load the saved data
+    df_saved = pd.read_csv("leie/saved_all.csv")
+
+    updated_rows = []
+
+    for index, row in df_saved.iterrows():
+        if not (40< index < 50):
+            # temporary limit for testing
+            continue
+        try:
+            # Extract data for the URL
+            updated_data = extract_ad_data(row["URL"], index, "leie")
+            updated_rows.append(updated_data)
+        except Exception as e:
+            print(f"Error processing URL at index {index}: {row['Finnkode']} - {e}")
+            # TODO this should keep the old data also
+            updated_rows.append({
+                "Finnkode": row["Finnkode"],
+                "Tilgjengelighet": "Slettet",
+            })
+
+    # Clean
+
+    # Save the updated data to a new CSV file
+    data = pd.DataFrame(updated_rows)
+    cleanData(data, 'leie', 'saved_all_updated.csv')
+    # data.to_csv("leie/saved_all_updated.csv", index=False)
+    print("Updated data saved to leie/saved_all_updated.csv")
+
 if __name__ == "__main__":
-    sheetName = "Main"
-    data = FindNewUnavailable(sheetName)
+    sheetName = "test"
+    # data = FindNewUnavailable(sheetName)
     # data = pd.read_csv("leie/saved_availability.csv")
-    PasteNewAvailability(data, sheetName)
+    # PasteNewAvailability(data, sheetName)
+
+    UpdateEverything()
+

@@ -28,6 +28,7 @@ def extract_ad_data(url, index, name, saveToHTML=False):
     address, area = getAddress(soup)
     sizes = getAllSizes(soup)
     prices = getRentPrice(soup)
+    date = getDate(soup)
 
     statuses = ["warning", "negative"]
     tilgjengelig = None
@@ -54,6 +55,8 @@ def extract_ad_data(url, index, name, saveToHTML=False):
         'Eksternt bruksareal (BRA-e)': sizes.get('info-usable-e-area'),
         'Balkong/Terrasse (TBA)': sizes.get('info-open-area'),
         'Bruttoareal': sizes.get('info-gross-area'),
+        'Innflytting': date.get('start'),
+        'Utflytting': date.get('end'),
     }
     print(f'Index {index}: {data}')
 
@@ -86,4 +89,4 @@ def extractDataFromAds(name: str, urls: DataFrame, outputFileName: str):
 
 
 if __name__ == "__main__":
-    extractDataFromAds('leie', pd.read_csv('leie/crawled.csv'), 'extracted.csv')
+    extractDataFromAds('leie', pd.read_csv('leie/live_URLs.csv'), 'live_data.csv')
