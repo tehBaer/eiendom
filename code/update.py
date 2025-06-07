@@ -20,16 +20,16 @@ def FindNewUnavailable(sheet_name: str, columns: str):
         # if (index < 50):
         #     continue
         # If Tilgjengelighet is already marked as Utleid or Slettet, | the row
-        # if (row["Tilgjengelighet"] == 'Utleid' or row["Tilgjengelighet"] == "Slettet"):
-        #     updated_rows.append({
-        #         "Finnkode": row["Finnkode"],
-        #         "Tilgjengelighet": row["Tilgjengelighet"],
-        #     })
-        #     print(f"Finnkode {row['Finnkode']} is already {row["Tilgjengelighet"]}")
-        #     continue
+        if (row["Tilgjengelighet"] == 'Utleid' or row["Tilgjengelighet"] == "Slettet"):
+            updated_rows.append({
+                "Finnkode": row["Finnkode"],
+                "Tilgjengelighet": row["Tilgjengelighet"],
+            })
+            print(f"Finnkode {row['Finnkode']} is already {row["Tilgjengelighet"]}")
+            continue
         try:
             # Extract data for the URL
-            updated_data = extract_ad_data(row["URL"], index, "leie")
+            updated_data = extract_ad_data(row["URL"], index, "leie", True, True)
             updated_rows.append(updated_data)
         except Exception as e:
             print(f"Error processing URL at index {index}: {row['Finnkode']} - {e}")
@@ -41,13 +41,13 @@ def FindNewUnavailable(sheet_name: str, columns: str):
     return dfdata
 
 
-def PasteNewAvailability(data, sheet_name):
+def PasteNewAvailability(data, sheet_name, startCell):
     # Initialize the service
     creds = get_credentials()
     service = build("sheets", "v4", credentials=creds)
 
     # Define spreadsheet ID and range name
-    range_name = f"{sheet_name}!D2"  # Adjust the range as needed
+    range_name = f"{sheet_name}!{startCell}"  # Adjust the range as needed
     # Replace NaN values with an empty string
     data = data.fillna("")
 
@@ -114,14 +114,14 @@ def get_everything_updated(df_saved: pd.DataFrame):
 
 
 if __name__ == "__main__":
-    sheetName = "New"
-    # data = FindNewUnavailable(sheetName, "C:L")
-    # data = pd.read_csv("leie/saved_availability.csv")
-    # PasteNewAvailability(data, sheetName)
+    sheetName = "Main"
+    data = FindNewUnavailable(sheetName, "D:L")
+    data = pd.read_csv("leie/saved_availability.csv")
+    PasteNewAvailability(data, sheetName, "D2")
 
 
-    creds = get_credentials()
-    service = build("sheets", "v4", credentials=creds)
-    download_sheet_as_csv(service, "New", "leie/_temp3.csv", "C:L")
-    df_saved = pd.read_csv("leie/to_paste.csv")
-    get_everything_updated(df_saved)
+    # creds = get_credentials()
+    # service = build("sheets", "v4", credentials=creds)
+    # download_sheet_as_csv(service, "New", "leie/_temp3.csv", "C:L")
+    # df_saved = pd.read_csv("leie/to_paste.csv")
+    # get_everything_updated(df_saved)

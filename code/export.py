@@ -102,7 +102,7 @@ def merge(emptyColCount, sheet_name, cleaned_path, saved_all_path, live_missing_
 
         find_new_rows(cleaned_path, saved_all_path, live_missing_path, emptyColCount)
 
-        # prepend_missing_rows(service, sheet_name, live_missing_path, range, emptyColCount)
+        prepend_missing_rows(service, sheet_name, live_missing_path, range, emptyColCount)
         print(f"Data successfully updated.")
     except HttpError as err:
         print(err)

@@ -22,6 +22,7 @@ def get_ad_content(url, projectName, auto_save_new=True, force_save=False):
     exists = os.path.exists(html_file_path)
 
     if (force_save):
+        time.sleep(0.1)
         print(f"Force-saving HTML content for {finnkode}.")
         return save_ad_html_content(url, projectName, finnkode)
 
@@ -30,6 +31,7 @@ def get_ad_content(url, projectName, auto_save_new=True, force_save=False):
             soup = BeautifulSoup(file.read(), 'html.parser')
             return soup
     else:
+        time.sleep(0.1)
         print(f"Saving HTML content for {finnkode}.")
         return save_ad_html_content(url, projectName, finnkode)
 
@@ -45,9 +47,9 @@ def save_ad_html_content(url, projectName, finnkode):
         return soup
 
 
-def extract_ad_data(url, index, projectName):
+def extract_ad_data(url, index, projectName, auto_save_new=True, force_save=False):
     try:
-        soup = get_ad_content(url, projectName)
+        soup = get_ad_content(url, projectName, auto_save_new, force_save)
     except Exception as e:
         print(f"Error fetching content for URL {url}: {e}")
         #     throw exception
@@ -104,7 +106,6 @@ def extractDataFromAds(projectName: str, urls: DataFrame, outputFileName: str):
         # Create a folder inside the previous folder for the htmls
         os.makedirs(f'{projectName}/html_extracted', exist_ok=True)
         for index, url in enumerate(urls['URL']):
-            time.sleep(random.uniform(0.1, 0.1)) #todo do a deltatime instead of a fixed sleep time
             try:
                 data = extract_ad_data(url, index, projectName)
                 collectedData.append(data)
