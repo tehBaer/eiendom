@@ -29,7 +29,11 @@ def parse_resultpage(urlBase, term, folder, page: int = 1, df=None):
     pattern = re.compile(term)
     matches = {href for href in hrefs if pattern.match(href) and len(href) <= 100}
 
-    full_urls = ['https://www.finn.no' + match for match in matches]
+    # full_urls = ['https://www.finn.no' + match for match in matches]
+    full_urls = [
+        match if match.startswith('http') else 'https://www.finn.no' + match
+        for match in matches
+    ]
 
     # Count the unique matches
     print(f'Number of unique matches on page {page}: {len(matches)}')

@@ -5,7 +5,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 import csv
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-SPREADSHEET_ID = "1HW6-mtyK5FDGA_aL1EUyX4ZQMZozL3XXeNcqzjlRYDA"
+# Den gamle før Bentsegata
+# SPREADSHEET_ID = "1HW6-mtyK5FDGA_aL1EUyX4ZQMZozL3XXeNcqzjlRYDA"
+SPREADSHEET_ID = "1ggwnC3eYklqWnHx9ebWWOIDyCUyBFqs40KrSFWUaB3Y"
 
 
 def get_credentials():

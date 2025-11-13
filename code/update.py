@@ -2,7 +2,7 @@
 
 from code.clean import cleanData
 from code.googleUtils import download_sheet_as_csv, get_credentials, SPREADSHEET_ID
-from code.extract import extract_ad_data
+from code.extraction_property import extract_property_data
 from googleapiclient.discovery import build
 
 
@@ -29,7 +29,7 @@ def FindNewUnavailable(sheet_name: str, columns: str):
             continue
         try:
             # Extract data for the URL
-            updated_data = extract_ad_data(row["URL"], index, "leie", True, True)
+            updated_data = extract_property_data(row["URL"], index, "leie", True, True)
             updated_rows.append(updated_data)
         except Exception as e:
             print(f"Error processing URL at index {index}: {row['Finnkode']} - {e}")
@@ -78,7 +78,7 @@ def get_everything_updated(df_saved: pd.DataFrame):
         #     continue
         try:
             # Extract data for the URL
-            updated_data = extract_ad_data(row["URL"], index, "leie")
+            updated_data = extract_property_data(row["URL"], index, "leie")
             updated_rows.append(updated_data)
         except Exception as e:
             # print(f"Error processing URL at index {index}: {row['Finnkode']} - {e}")

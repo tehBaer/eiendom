@@ -9,7 +9,7 @@ from utils import *
 subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
 
-def get_ad_content(url, projectName, auto_save_new=True, force_save=False):
+def get_property_content(url, projectName, auto_save_new=True, force_save=False):
     """
     Fetches ad data from the given URL and saves the HTML content if specified.
     :param url: The URL of the ad to extract data from.
@@ -47,9 +47,9 @@ def save_ad_html_content(url, projectName, finnkode):
         return soup
 
 
-def extract_ad_data(url, index, projectName, auto_save_new=True, force_save=False):
+def extract_property_data(url, index, projectName, auto_save_new=True, force_save=False):
     try:
-        soup = get_ad_content(url, projectName, auto_save_new, force_save)
+        soup = get_property_content(url, projectName, auto_save_new, force_save)
     except Exception as e:
         print(f"Error fetching content for URL {url}: {e}")
         #     throw exception
@@ -95,7 +95,7 @@ def extract_ad_data(url, index, projectName, auto_save_new=True, force_save=Fals
     return data
 
 
-def extractDataFromAds(projectName: str, urls: DataFrame, outputFileName: str):
+def extractPropertyDataFromAds(projectName: str, urls: DataFrame, outputFileName: str):
     # Create the directory if it doesn't exist
     os.makedirs(projectName, exist_ok=True)
 
@@ -107,7 +107,7 @@ def extractDataFromAds(projectName: str, urls: DataFrame, outputFileName: str):
         os.makedirs(f'{projectName}/html_extracted', exist_ok=True)
         for index, url in enumerate(urls['URL']):
             try:
-                data = extract_ad_data(url, index, projectName)
+                data = extract_property_data(url, index, projectName)
                 collectedData.append(data)
             except Exception as e:
                 print(f'Error processing URL at index {index}: {url} - {e}')
@@ -120,4 +120,4 @@ def extractDataFromAds(projectName: str, urls: DataFrame, outputFileName: str):
 
 
 if __name__ == "__main__":
-    extractDataFromAds('leie', pd.read_csv('leie/live_URLs.csv'), 'live_data.csv')
+    extractPropertyDataFromAds('leie', pd.read_csv('leie/live_URLs.csv'), 'live_data.csv')
