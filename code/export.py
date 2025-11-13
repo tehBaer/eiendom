@@ -110,7 +110,7 @@ def merge(emptyColCount, sheet_name, cleaned_path, saved_all_path, live_missing_
 
 if __name__ == "__main__":
     merge(
-        emptyColCount=2,
+        emptyColCount=3,
         sheet_name="Main",
         cleaned_path="leie/live_data_parsed.csv",
         saved_all_path="leie/sheet_downloaded.csv",

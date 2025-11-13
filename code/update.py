@@ -115,7 +115,7 @@ def get_everything_updated(df_saved: pd.DataFrame):
 
 if __name__ == "__main__":
     sheetName = "Main"
-    data = FindNewUnavailable(sheetName, "D:L")
+    # data = FindNewUnavailable(sheetName, "D:L")
     data = pd.read_csv("leie/saved_availability.csv")
     PasteNewAvailability(data, sheetName, "D2")
 
