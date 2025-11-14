@@ -1,41 +1,4 @@
-﻿import os
-import re
-
-import requests
-from bs4 import BeautifulSoup
-
-
-def saveToFile(url, filename, projectname):
-    # Create the folder if it doesn't exist
-    os.makedirs(projectname, exist_ok=True)
-    # Create a folder inside the previous folder for the htmls
-    os.makedirs(f'{projectname}/html_extracted', exist_ok=True)
-
-    # Save the HTML content to a file inside the folder
-    with open(f'{projectname}/html_extracted/{filename}.html', 'w', encoding='utf-8') as file:
-        file.write(url.prettify())
-
-
-def saveToFile(url, filename, folder):
-    # Create the folder if it doesn't exist
-    os.makedirs(folder, exist_ok=True)
-    # Create a folder inside the previous folder for the htmls
-    os.makedirs(f'{folder}/html_extracted', exist_ok=True)
-    response = requests.get(url)
-    response.raise_for_status()  # Ensure the request was successful
-    soup = BeautifulSoup(response.text, 'html.parser')  # Parse the HTML content
-    with open(f"{folder}/{filename}.html", "w", encoding="utf-8") as file:
-        file.write(soup.prettify())  # Use prettify on the BeautifulSoup object
-
-
-def OLD_getBuyPrice(soup):
-    pricing_section = soup.find('section', {'aria-labelledby': 'sales-costs'})
-
-    prisantydning_match = re.search(r'kr\s*([\d\s]+),-', pricing_section.get_text())
-    prisantydning = None
-    if prisantydning_match:
-        prisantydning = prisantydning_match.group(1).replace('\xa0', '')
-    return prisantydning
+﻿import re
 
 
 def getBuyPrice(soup):

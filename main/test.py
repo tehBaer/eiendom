@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-from code.utils import OLD_getBuyPrice, getAddress, getSize, getRentPrice
+from main.parsing_helpers_property import getSize, getRentPrice
 
 subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 

@@ -1,9 +1,9 @@
 ﻿import subprocess
 import pandas as pd
-from code.clean import cleanData
-from code.crawl import extract_URLs
-from code.export import merge
-from code.extraction_property import extractPropertyDataFromAds
+from main.clean import cleanData
+from main.crawl import extract_URLs
+from main.export import merge_above
+from main.extraction_property import extractPropertyDataFromAds
 
 subprocess.run(['..\\.venv\\Scripts\\activate.bat'], shell=True, check=True)
 
@@ -22,7 +22,7 @@ cleanData(data, projectName, "live_data_parsed.csv")
 
 # 4
 emptyColCount = 3
-merge(emptyColCount,
+merge_above(emptyColCount,
       "Leie",
       f"{projectName}/live_data_parsed.csv",
       f"{projectName}/sheet_downloaded.csv",

@@ -1,8 +1,8 @@
 ﻿import pandas as pd
 
-from code.clean import cleanData
-from code.googleUtils import download_sheet_as_csv, get_credentials, SPREADSHEET_ID
-from code.extraction_property import extract_property_data
+from main.clean import cleanData
+from main.googleUtils import download_sheet_as_csv, get_credentials, SPREADSHEET_ID
+from main.extraction_property import extract_property_data
 from googleapiclient.discovery import build
 
 

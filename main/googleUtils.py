@@ -48,15 +48,15 @@ def read_csv(file_path):
     return data
 
 
-def download_sheet_as_csv(service, sheet_name, output_file, range):
+def download_sheet_as_csv(service, sheet_name, output_file, range="A1:Z1000"):
     """Download data from a specific sheet and save it as a CSV file."""
     range_name = f"{sheet_name}!{range}"  # Adjust the range as needed
     result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range_name).execute()
     data = result.get("values", [])
 
     if not data:
-        print(f"No data found in sheet: {sheet_name}")
-        return
+        print(f"No data found in sheet: {sheet_name}, writing empty file.")
+        data = []
 
     # Write data to a CSV file
     with open(output_file, "w", encoding="utf-8", newline="") as file:

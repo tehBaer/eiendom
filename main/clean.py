@@ -3,6 +3,10 @@ from pandas import DataFrame
 
 
 def cleanData(df: DataFrame, projectName: str, outputFileName: str, originalDF: DataFrame = None) -> DataFrame:
+    if df.empty:
+        df.to_csv(f'{projectName}/{outputFileName}', index=False)
+        return df
+
     # Convert area columns to numeric, coerce errors to NaN
     for col in ['Primærrom', 'Internt bruksareal (BRA-i)', 'Bruksareal']:
         if col in df.columns:
