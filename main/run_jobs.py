@@ -21,4 +21,5 @@ try_merge_below(projectName,
                 f"{projectName}/live_data.csv",
                 f"{projectName}/sheet_downloaded.csv",
                 f"{projectName}/live_missing.csv",
+                f"{projectName}/live_missing_aligned.csv",
                 headers)
