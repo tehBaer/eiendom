@@ -181,7 +181,7 @@ def check_missing_headers(df: pd.DataFrame, headers_to_use: List[str]) -> List[s
     missing_headers = [h for h in headers_to_use if h not in df.columns]
     return missing_headers
 
-def try_merge_below(projectName, sheet_name, path_live, path_downloaded_sheet, path_live_aligned_missing, path_live_aligned, headers_to_use: List[str]):
+def try_merge_below(projectName, sheet_name, path_live, path_downloaded_sheet, path_live_aligned_missing, path_missing_aligned, headers_to_use: List[str]):
     """Checks for missing headers in both CSVs before merging below."""
     # Check headers in live data
     live_df = pd.read_csv(path_live)
@@ -201,11 +201,12 @@ def try_merge_below(projectName, sheet_name, path_live, path_downloaded_sheet, p
     if headers_missing_in_sheet:
         raise Exception(f"Missing required headers in sheet: {headers_missing_in_sheet}")
 
-    align_to_sheet_layout(path_live, path_downloaded_sheet, path_live_aligned)
 
-    filtered_successfully = try_filter_new_ads(path_live_aligned, path_downloaded_sheet, path_live_aligned_missing, headers_to_use)
+    filtered_successfully = try_filter_new_ads(path_missing_aligned, path_downloaded_sheet, path_live_aligned_missing, headers_to_use)
+
     if (filtered_successfully):
-        append_missing_ads(service, sheet_name, path_live_aligned_missing)
+        align_to_sheet_layout(path_live, path_downloaded_sheet, path_missing_aligned)
+        append_missing_ads(service, sheet_name, path_missing_aligned)
 
 
 def append_missing_ads(service, sheet_name, missing_rows_path):
