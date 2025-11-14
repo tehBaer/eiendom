@@ -32,6 +32,11 @@ def extract_job_data(url, index, projectName, auto_save_new=True, force_save=Fal
         'Finnkode': url.rstrip('/').split('/')[-1],
         'URL': url,
         'Selskap': parser.get_company(),
+        'Stillingstittel': parser.get_job_title(),
+        'Industri' : parser.get_industry(),
+        'Tittel' : parser.get_ad_title(),
+        'Søknadsfrist' : parser.get_deadline(),
+        'Posisjoner' : parser.get_job_positions(),
     }
     print(f'Index {index}: {data}')
 

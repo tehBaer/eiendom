@@ -79,7 +79,14 @@ class JobParser:
         for li in list_items:
             text = li.get_text()
             if 'Frist' in text:
+                # Try to extract date first
                 date_match = re.search(r'\d{2}\.\d{2}\.\d{4}', text)
                 if date_match:
                     return date_match.group(0)
+
+                # If no date, extract text after "Frist"
+                # Remove "Frist" and any leading/trailing whitespace
+                deadline_text = text.replace('Frist', '').strip()
+                if deadline_text:
+                    return deadline_text
         return None

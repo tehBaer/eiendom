@@ -16,7 +16,7 @@ regex = r'https://www\.finn\.no/job/ad/\d+'
 urls = pd.read_csv(f'{projectName}/0_URLs.csv')  # for debugging quickly
 extractJobDataFromAds(projectName, urls, "A_live.csv")
 
-headers = ['Finnkode', 'URL', 'Selskap']
+headers = ['Finnkode', 'URL', 'Selskap', 'Stillingstittel', 'Industri', 'Tittel', 'Søknadsfrist', 'Posisjoner']
 
 try_merge_below("Jobb",
                 f"{projectName}/A_live.csv",

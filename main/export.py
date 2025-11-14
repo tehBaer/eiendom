@@ -70,8 +70,6 @@ def try_filter_new_ads(path_csv_to_filter, path_sheets_downloaded, path_output, 
             return False
 
         # Save all columns (preserving alignment)
-        # missing_ads = missing_ads[headers]  # Add this line before saving
-
         missing_ads.to_csv(path_output, index=False)
         print(f"Missing rows saved to '{path_output}'.")
         return True
