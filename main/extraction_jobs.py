@@ -3,6 +3,7 @@ import subprocess
 import pandas as pd
 from pandas import DataFrame
 from main.extraction import load_or_fetch_ad_html
+from main.parsing_helpers_jobs import JobParser
 from parsing_helpers_property import *
 
 
@@ -13,10 +14,8 @@ def extract_job_data(url, index, projectName, auto_save_new=True, force_save=Fal
         print(f"Error fetching content for URL {url}: {e}")
         #     throw exception
         raise
-    # address, area = getAddress(soup)
-    # sizes = getAllSizes(soup)
-    # prices = getRentPrice(soup)
-    # date = getDate(soup)
+    parser = JobParser(soup)
+
 
     # statuses = ["warning", "negative"]
     # tilgjengelig = None
@@ -31,20 +30,8 @@ def extract_job_data(url, index, projectName, auto_save_new=True, force_save=Fal
     data = {
         # 'Index': index,
         'Finnkode': url.rstrip('/').split('/')[-1],
-        # 'Tilgjengelighet': tilgjengelig,
-        # 'Adresse': address,
-        # 'Postnummer': area,
-        # 'Leiepris': prices.get('monthly'),
-        # 'Depositum': prices.get('deposit'),
         'URL': url,
-        # 'Primærrom': sizes.get('info-primary-area'),
-        # 'Internt bruksareal (BRA-i)': sizes.get('info-usable-i-area'),
-        # 'Bruksareal': sizes.get('info-usable-area'),
-        # 'Eksternt bruksareal (BRA-e)': sizes.get('info-usable-e-area'),
-        # 'Balkong/Terrasse (TBA)': sizes.get('info-open-area'),
-        # 'Bruttoareal': sizes.get('info-gross-area'),
-        # 'Innflytting': date.get('start'),
-        # 'Utflytting': date.get('end'),
+        'Selskap': parser.get_company(),
     }
     print(f'Index {index}: {data}')
 
