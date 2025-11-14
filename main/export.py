@@ -35,7 +35,10 @@ def try_filter_new_ads(path_live, path_sheets_downloaded, path_output, headers: 
                 raise ValueError(f'Missing required column in header: {col}')
 
         # Find rows in live_df not in sheets_df
-        missing_ads = live_df[~live_df['Finnkode'].isin(sheets_df['Finnkode'])]
+        missing_ads = live_df.copy()
+        missing_ads['Finnkode'] = missing_ads['Finnkode'].astype(str).str.strip()
+        sheets_df['Finnkode'] = sheets_df['Finnkode'].astype(str).str.strip()
+        missing_ads = missing_ads[~missing_ads['Finnkode'].isin(sheets_df['Finnkode'])]
         print("Found", len(missing_ads), "missing ads.")
 
         if missing_ads.empty:
