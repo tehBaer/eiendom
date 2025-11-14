@@ -42,12 +42,10 @@ def try_filter_new_ads(path_csv_to_filter, path_sheets_downloaded, path_output, 
         # Load all columns from the aligned CSV
         live_df = pd.read_csv(path_csv_to_filter)
 
-        # Load the sheets CSV with specified headers for comparison
+        # Load the sheets CSV - skip the first unnamed column
         sheets_df = pd.read_csv(
             path_sheets_downloaded,
-            header=None,
-            names=headers,
-            usecols=headers,
+            usecols=headers,  # Only read the columns you need
             on_bad_lines='skip'
         )
 
@@ -59,6 +57,11 @@ def try_filter_new_ads(path_csv_to_filter, path_sheets_downloaded, path_output, 
         # Find rows in live_df not in sheets_df based on Finnkode
         live_df['Finnkode'] = live_df['Finnkode'].astype(str).str.strip()
         sheets_df['Finnkode'] = sheets_df['Finnkode'].astype(str).str.strip()
+
+        # Debug: print what we're comparing
+        print(f"Live Finnkodes: {live_df['Finnkode'].tolist()}")
+        print(f"Sheet Finnkodes: {sheets_df['Finnkode'].tolist()}")
+
         missing_ads = live_df[~live_df['Finnkode'].isin(sheets_df['Finnkode'])]
         print("Found", len(missing_ads), "missing ads.")
 
