@@ -37,10 +37,12 @@ def align_to_sheet_layout(csv_to_align, sheet_downloaded_path, output_path):
     aligned.to_csv(output_path, index=False, header=True)
 
 
-def try_filter_new_ads(path_live, path_sheets_downloaded, path_output, headers: List[str]) -> bool:
+def try_filter_new_ads(path_csv_to_filter, path_sheets_downloaded, path_output, headers: List[str]) -> bool:
     try:
-        # Load the CSV files
-        live_df = pd.read_csv(path_live, usecols=headers)
+        # Load all columns from the aligned CSV
+        live_df = pd.read_csv(path_csv_to_filter)
+
+        # Load the sheets CSV with specified headers for comparison
         sheets_df = pd.read_csv(
             path_sheets_downloaded,
             header=None,
@@ -51,22 +53,21 @@ def try_filter_new_ads(path_live, path_sheets_downloaded, path_output, headers: 
 
         # Check for required columns
         for col in headers:
-            if col not in sheets_df.columns:
-                raise ValueError(f'Missing required column in header: {col}')
+            if col not in live_df.columns:
+                raise ValueError(f'Missing required column in live data: {col}')
 
-        # Find rows in live_df not in sheets_df
-        missing_ads = live_df.copy()
-        missing_ads['Finnkode'] = missing_ads['Finnkode'].astype(str).str.strip()
+        # Find rows in live_df not in sheets_df based on Finnkode
+        live_df['Finnkode'] = live_df['Finnkode'].astype(str).str.strip()
         sheets_df['Finnkode'] = sheets_df['Finnkode'].astype(str).str.strip()
-        missing_ads = missing_ads[~missing_ads['Finnkode'].isin(sheets_df['Finnkode'])]
+        missing_ads = live_df[~live_df['Finnkode'].isin(sheets_df['Finnkode'])]
         print("Found", len(missing_ads), "missing ads.")
 
         if missing_ads.empty:
             print("No new rows to save. The output file will not be created.")
-            return
+            return False
 
-        # Save only the specified columns
-        missing_ads.to_csv(path_output, index=False, columns=headers)
+        # Save all columns (preserving alignment)
+        missing_ads.to_csv(path_output, index=False)
         print(f"Missing rows saved to '{path_output}'.")
         return True
 
@@ -181,10 +182,10 @@ def check_missing_headers(df: pd.DataFrame, headers_to_use: List[str]) -> List[s
     missing_headers = [h for h in headers_to_use if h not in df.columns]
     return missing_headers
 
-def try_merge_below(projectName, sheet_name, path_live, path_downloaded_sheet, path_live_aligned_missing, path_missing_aligned, headers_to_use: List[str]):
+def try_merge_below(sheet_name, pA_live, p_sheet, pC_filtered, pB_aligned, headers_to_use: List[str]):
     """Checks for missing headers in both CSVs before merging below."""
     # Check headers in live data
-    live_df = pd.read_csv(path_live)
+    live_df = pd.read_csv(pA_live)
     headers_missing_in_live = [h for h in headers_to_use if h not in live_df.columns]
     if headers_missing_in_live:
         raise Exception(f"Missing required headers in live data: {headers_missing_in_live}")
@@ -192,27 +193,30 @@ def try_merge_below(projectName, sheet_name, path_live, path_downloaded_sheet, p
     try:
         creds = get_credentials()
         service = build("sheets", "v4", credentials=creds)
-        download_sheet_as_csv(service, sheet_name, path_downloaded_sheet)
+        download_sheet_as_csv(service, sheet_name, p_sheet)
     except HttpError as err:
         print(err)
+
     # Check headers in downloaded sheet
-    sheet_df = pd.read_csv(path_downloaded_sheet)
+    sheet_df = pd.read_csv(p_sheet)
     headers_missing_in_sheet = [h for h in headers_to_use if h not in sheet_df.columns]
     if headers_missing_in_sheet:
         raise Exception(f"Missing required headers in sheet: {headers_missing_in_sheet}")
 
+    # Align sheet layout
+    align_to_sheet_layout(pA_live, p_sheet, pB_aligned)
 
-    filtered_successfully = try_filter_new_ads(path_missing_aligned, path_downloaded_sheet, path_live_aligned_missing, headers_to_use)
+    # Create pC_filtered with missing ads
+    filtered_successfully = try_filter_new_ads(pB_aligned, p_sheet, pC_filtered, headers_to_use)
 
     if (filtered_successfully):
-        align_to_sheet_layout(path_live, path_downloaded_sheet, path_missing_aligned)
-        append_missing_ads(service, sheet_name, path_missing_aligned)
+        append_missing_ads(service, sheet_name, pC_filtered)
 
 
-def append_missing_ads(service, sheet_name, missing_rows_path):
+def append_missing_ads(service, sheet_name, pC_filtered):
     try:
         # Read missing rows from the CSV file
-        with open(missing_rows_path, "r", encoding="utf-8") as file:
+        with open(pC_filtered, "r", encoding="utf-8") as file:
             csv_reader = csv.reader(file)
             missing_rows = list(csv_reader)
 
@@ -235,7 +239,8 @@ def append_missing_ads(service, sheet_name, missing_rows_path):
             body=body,
         ).execute()
 
-        print(f"Missing rows have been appended to the sheet: {sheet_name}")
+        # Print the count of appended rows
+        print(f"Appended {len(missing_rows)} missing rows to the sheet: {sheet_name}")
 
     except Exception as e:
         print(f"An error occurred: {e}")

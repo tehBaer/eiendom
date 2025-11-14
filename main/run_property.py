@@ -11,8 +11,8 @@ projectName = 'leie'
 # 1
 urlBase = 'https://www.finn.no/realestate/lettings/search.html?radius=700&lat=59.939015007471454&lon=10.75032940563446&price_from=13000&price_to=18500'
 regex = r'/realestate/.*?/ad\.html\?finnkode=\d+'
-urls = extract_URLs(urlBase, regex, projectName, "live_URLs.csv")
-# urls = pd.read_csv(f'{projectName}/live_URLs.csv')
+urls = extract_URLs(urlBase, regex, projectName, "0_URLs.csv")
+# urls = pd.read_csv(f'{projectName}/0_URLs.csv')
 extractPropertyDataFromAds(projectName, urls, "live_data.csv")
 
 # ALso extract data from the downloaded sheets
